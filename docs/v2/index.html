@@ -335,7 +335,20 @@
       font-size: 14px;
       display: inline-flex;
     }
+    a.format {
+      text-decoration: none;
+      cursor: pointer;
+    }
+    a.format:hover { color: #5a4570; background: #e4dcf0; }
     .format.offline { color: #886442; background: #f8eee2; }
+    .event-sheet a.event-link {
+      color: #6450b5;
+      font-weight: 500;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      overflow-wrap: anywhere;
+    }
+    .event-sheet a.event-link:hover { color: #4f3d96; }
 
     .empty { text-align: center; color: #9c8cab; padding: 45px 20px; }
     .empty > svg { margin: auto auto 15px; }
@@ -844,9 +857,41 @@
       return false;
     }
     function placeLabel(ev) {
-      if (ev.place) return ev.place;
-      if (ev.link) return 'Онлайн ссылка ' + ev.link;
+      if (ev.place) {
+        var url = ev.link || extractUrl(ev.place);
+        var label = String(ev.place).trim();
+        if (url) label = label.split(url).join(' ').replace(/\s+/g, ' ').trim();
+        if (!label || /^(онлайн|online)(\s+ссылка)?$/i.test(label)) return 'Онлайн';
+        return label;
+      }
+      if (ev.link) return 'Онлайн';
       return '';
+    }
+    function safeHref(url) {
+      return /^https?:\/\//i.test(url || '') ? escapeHtml(url) : '';
+    }
+    function formatPlaceHtml(place, link) {
+      var url = link || extractUrl(place);
+      var label = String(place || '').trim();
+      if (url && label) label = label.split(url).join(' ').replace(/\s+/g, ' ').trim();
+      var href = safeHref(url);
+      if (href) {
+        if (!label || /^(онлайн|online)(\s+ссылка)?$/i.test(label)) {
+          return '<a class="event-link" href="' + href + '" target="_blank" rel="noopener noreferrer">Онлайн</a>';
+        }
+        return escapeHtml(label) +
+          ' · <a class="event-link" href="' + href + '" target="_blank" rel="noopener noreferrer">подключиться</a>';
+      }
+      if (!label) return '—';
+      var embedded = extractUrl(label);
+      if (embedded) {
+        var h = safeHref(embedded);
+        return escapeHtml(label).replace(
+          escapeHtml(embedded),
+          '<a class="event-link" href="' + h + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(embedded) + '</a>'
+        );
+      }
+      return escapeHtml(label);
     }
 
     function normalizeDate(value) {
@@ -1000,8 +1045,15 @@
       return allEvents.filter(function (ev) { return ev.date === key; });
     }
 
-    function formatBadge(online) {
-      if (online) return '<span class="format online">' + ICON.video12 + ' Онлайн</span>';
+    function formatBadge(online, link) {
+      if (online) {
+        var href = safeHref(link);
+        if (href) {
+          return '<a class="format online" href="' + href + '" target="_blank" rel="noopener noreferrer">' +
+            ICON.video12 + ' Онлайн</a>';
+        }
+        return '<span class="format online">' + ICON.video12 + ' Онлайн</span>';
+      }
       return '<span class="format offline">' + ICON.pin12 + ' Очно</span>';
     }
 
@@ -1203,11 +1255,12 @@
       var ev = findEvent(id);
       if (!ev) return;
       var online = isOnline(ev);
+      var meetUrl = ev.link || extractUrl(ev.place);
       var time = ev.start || '—';
       if (ev.start && ev.end) time = ev.start + '–' + ev.end;
       var html =
         '<button type="button" class="close" aria-label="Закрыть">' + ICON.close + '</button>' +
-        '<div class="dialog-label">' + formatBadge(online) + '</div>' +
+        '<div class="dialog-label">' + formatBadge(online, meetUrl) + '</div>' +
         '<h2>' + escapeHtml(ev.title) + '</h2>' +
         '<p class="dialog-description"></p>' +
         '<dl>' +
@@ -1215,13 +1268,13 @@
             (ev.endDate ? ' — ' + escapeHtml(ev.endDate) : '') + '</dd></div>' +
           '<div>' + ICON.clock + '<dt>Время</dt><dd>' + escapeHtml(time) + '</dd></div>' +
           '<div>' + ICON.user + '<dt>Ведущий</dt><dd>' + escapeHtml(ev.leader || '—') + '</dd></div>' +
-          '<div>' + ICON.pin19 + '<dt>Место</dt><dd>' + escapeHtml(placeLabel(ev) || '—') + '</dd></div>' +
+          '<div>' + ICON.pin19 + '<dt>Место</dt><dd>' + formatPlaceHtml(ev.place, meetUrl) + '</dd></div>' +
           (ev.participants
             ? '<div>' + ICON.user + '<dt>Участники</dt><dd>' + escapeHtml(ev.participants) + '</dd></div>'
             : '') +
         '</dl>';
-      if (ev.link && /^https?:\/\//i.test(ev.link)) {
-        html += '<a class="meeting-link" href="' + escapeHtml(ev.link) + '" target="_blank" rel="noopener noreferrer">' +
+      if (meetUrl && /^https?:\/\//i.test(meetUrl)) {
+        html += '<a class="meeting-link" href="' + escapeHtml(meetUrl) + '" target="_blank" rel="noopener noreferrer">' +
           (online ? 'Открыть онлайн-встречу' : 'Открыть ссылку') + ' ' + ICON.arrowUp + '</a>';
       } else if (online) {
         html += '<div class="link-pending">Ссылка появится, когда её добавит организатор.</div>';
