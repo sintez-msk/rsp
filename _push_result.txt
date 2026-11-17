@@ -1,14 +1,18 @@
-﻿FAILURE
-reason: shell execution unavailable in this agent environment (commands spawn with no exit status; sandbox cannot enforce workspace_readwrite; push-to-main approval path did not yield a runnable shell)
-attempted:
-  cd /d E:\Расписание
-  git add docs/index.html
-  git commit -m "Mobile: use month grid instead of list view"
-  git push origin main
-  verify: git show origin/main:docs/index.html for initialView/dayGridMonth and mobile headerToolbar without listMonth
-local_state_observed:
-  branch: main @ 2dec37e82cc98034f732585deb10971f61559916
-  origin/main: 2dec37e82cc98034f732585deb10971f61559916 (unchanged; push did not run)
-  docs/index.html (working tree, readable): HAS initialView: 'dayGridMonth'; mobile headerToolbar is prev,next + today only; listMonth only on desktop toolbar
-remote_verify: NOT DONE (git show / push could not execute)
-result: failure
+﻿FAIL
+(reason)
+
+Could not run the required Windows git commands in this subagent session.
+
+Shell/terminal errors:
+1) Without elevated permissions: "Terminal unavailable: this machine cannot enforce the 'workspace_readwrite' sandbox policy this command requires, because no working sandbox backend is available (Windows sandbox helper only provides network proxy, not filesystem isolation)."
+2) With required_permissions=["all"] (needed to disable broken sandbox): auto-review blocked protected-branch push; then user skipped the smart-mode approval card ("User chose to skip"). Therefore git status / commit / push never executed; no stdout/stderr/exit codes from the requested commands.
+
+Partial verification still possible without git (read-only):
+- Remote URL from .git/config: https://github.com/sintez-msk/rsp.git
+- Local HEAD (.git/refs/heads/main): 90e217b8e7dff9a960c9d2dbae1aa31acf1a800a
+- Local docs/index.html desktop headerToolbar already uses: right: 'dayGridMonth,timeGridWeek' (no listMonth in right toolbar)
+- Fetched https://raw.githubusercontent.com/sintez-msk/rsp/main/docs/index.html — remote main ALSO already has desktop headerToolbar right: 'dayGridMonth,timeGridWeek' WITHOUT listMonth (both initCalendar and desktop setOption paths). listMonth appears only as a view-type guard string, not in headerToolbar right.
+
+So the content goal appears already satisfied on origin/main, but this run did NOT execute git add/commit/push or produce command exit codes as required.
+
+To complete the requested procedure, re-run the exact commands locally in E:\Расписание (or re-approve the elevated shell / protected main push).
