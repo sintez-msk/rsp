@@ -243,6 +243,12 @@
       font-size: 15px;
       display: grid;
     }
+    .day-number:hover { color: rgb(100, 80, 181); background: rgb(238, 235, 243); }
+    .event-card.online {
+      color: rgb(103, 82, 126);
+      background: rgb(240, 235, 248);
+      border-left-color: rgb(183, 164, 206);
+    }
     .is-today .day-number { color: #fff; background: rgb(120, 97, 159); }
     .is-today { background: rgb(250, 248, 254) !important; }
     .day-events { flex-direction: column; gap: 5px; display: flex; }
@@ -382,7 +388,9 @@
       display: flex;
     }
     footer > span:first-child { color: rgb(115, 107, 121); font: 22px "Source Serif 4", Georgia, serif; }
-    footer .footer-right { align-items: center; gap: 10px; margin-left: auto; display: flex; }
+    footer .footer-right { align-items: center; gap: 10px; margin-left: auto; display: inline-flex; }
+    .help-dialog .eyebrow { margin-bottom: 8px; }
+    .help-dialog .meeting-link { margin-top: 10px; }
 
     .event-dialog, .help-dialog {
       background: rgb(253, 252, 250);
@@ -546,8 +554,6 @@
       .list-event > .format { margin-left: 54px; }
       .list-event > svg { margin-left: auto; }
       .calendar-bottom { align-items: center; gap: 12px; font-size: 12px; line-height: 1.6; }
-      .demo-notice { flex-wrap: wrap; gap: 12px; margin: 25px 0 32px; padding: 16px; }
-      .demo-notice > .demo-label { margin-left: 0; }
       footer { flex-wrap: wrap; gap: 10px; padding: 22px 0; }
       footer .footer-right { display: none; }
       .event-dialog, .help-dialog { padding: 32px 24px; }
@@ -563,12 +569,10 @@
     <header class="header">
       <a href="./" class="brand">Философия <span>Синтеза</span><small>ПРОСТРАНСТВО ПОЗНАНИЯ</small></a>
       <div class="header-right">
-        <span class="test-badge">Тест · новый дизайн</span>
         <span class="nav-current">Расписание</span>
         <span class="header-divider"></span>
         <a class="classic-link" href="../" title="Классический вариант">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-          <span>Классический</span>
+          <span class="test-badge">Тест</span>
         </a>
         <button class="help-button" type="button" id="help-btn">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
@@ -630,44 +634,40 @@
         <div id="day-details" class="day-details"></div>
 
         <div class="calendar-bottom">
-          <span>Место встречи идей и людей.</span>
-          <span>UTC+3 · Google Таблица</span>
-        </div>
-
-        <div class="demo-notice">
-          <div>
-            <strong>Это тестовый дизайн</strong>
-            <p>Основной сайт не менялся. Здесь проверяем новый вид. <a href="../" style="text-decoration:underline">Вернуться к классическому</a>.</p>
-          </div>
-          <span class="demo-label">v2 · тест</span>
+          <span>(UTC+3)</span>
+          <span>Расписание из Google Таблицы</span>
         </div>
       </section>
     </main>
 
     <footer>
       <span>Философия Синтеза</span>
-      <p>Найдите время для познания</p>
-      <div class="footer-right">
-        <span>Переключайте месяцы стрелками</span>
-        <span>·</span>
-        <span>Нажмите на мероприятие для подробностей</span>
-      </div>
+      <p>Место встречи идей и людей.</p>
+      <span class="footer-right">Познание начинается с встречи
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+      </span>
     </footer>
   </div>
 
   <dialog class="event-dialog" id="event-dialog">
-    <button type="button" class="close" id="close-event" aria-label="Закрыть">✕</button>
+    <button type="button" class="close" id="close-event" aria-label="Закрыть">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
     <div id="event-dialog-body"></div>
   </dialog>
 
-  <dialog class="help-dialog" id="help-dialog">
-    <button type="button" class="close" id="close-help" aria-label="Закрыть">✕</button>
-    <h2>Как пользоваться</h2>
-    <ol>
-      <li>Переключайте месяцы стрелками. Кнопка «Сегодня» вернёт к текущему месяцу.</li>
-      <li>Выбирайте календарь или список. Нажмите на мероприятие, чтобы узнать время, ведущего и место.</li>
-      <li>У онлайн-мероприятий ссылка появится в подробностях, когда её добавит организатор.</li>
-    </ol>
+  <dialog class="help-dialog event-dialog" id="help-dialog">
+    <button type="button" class="close" id="close-help" aria-label="Закрыть">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+    <div class="eyebrow"><span></span> ВАША СЛЕДУЮЩАЯ ВСТРЕЧА</div>
+    <h2>Найдите время для познания</h2>
+    <p>Переключайте месяцы стрелками. Кнопка «Сегодня» вернёт вас к текущему месяцу.</p>
+    <p>Выбирайте календарь или список. Нажмите на мероприятие, чтобы узнать время, ведущего и место встречи.</p>
+    <p>У онлайн-мероприятий ссылка появится в подробностях, когда её добавит организатор.</p>
+    <button type="button" class="meeting-link" id="help-ok">Понятно
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </button>
   </dialog>
 
   <script>
@@ -702,9 +702,14 @@
     var helpDialog = document.getElementById('help-dialog');
     var eventDialogBody = document.getElementById('event-dialog-body');
 
-    var monthFmt = new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' });
     var dayLongFmt = new Intl.DateTimeFormat('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+    var monthLong = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
     var monthShort = ['янв.', 'февр.', 'март', 'апр.', 'мая', 'июня', 'июля', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'];
+    function formatMonthTitle(d) {
+      return monthLong[d.getMonth()] + ' ' + d.getFullYear();
+    }
+    var ICON_VIDEO = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>';
+    var ICON_PIN = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>';
 
     function pad2(n) { var s = String(n); return s.length < 2 ? '0' + s : s; }
     function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
@@ -811,7 +816,6 @@
     function rowsToEvents(values) {
       var headerInfo = detectHeader(values);
       var events = [];
-      var nowMoscow = nowMoscowStamp();
       for (var r = headerInfo.dataStart; r < values.length; r++) {
         var row = values[r];
         var title = cellString(row, headerInfo.map.title);
@@ -832,8 +836,6 @@
         if (status && participants) participants = status + ' · ' + participants;
         else if (status) participants = status;
         var endIsoDate = endDate || date;
-        var endForFilter = combineDateTime(endIsoDate, endTime || '23:59');
-        if (endForFilter < nowMoscow) continue;
         events.push({
           id: String(r),
           title: title,
@@ -945,7 +947,7 @@
       var y = cursor.getFullYear();
       var m = cursor.getMonth();
       var monthEvents = eventsInMonth(y, m);
-      monthTitle.textContent = monthFmt.format(cursor);
+      monthTitle.textContent = formatMonthTitle(cursor);
       monthCount.textContent = monthEvents.length + ' в этом месяце';
 
       var first = new Date(y, m, 1);
@@ -971,32 +973,32 @@
       }
 
       var today = todayKey();
-      var maxShow = window.matchMedia('(max-width: 700px)').matches ? 0 : 3;
+      var maxShow = window.matchMedia('(max-width: 700px)').matches ? 0 : 2;
       var html = '<div class="calendar"><div class="weekdays">' +
         ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'].map(function (w) { return '<span>' + w + '</span>'; }).join('') +
         '</div><div class="calendar-grid">';
 
       cells.forEach(function (cell) {
-        var dayEvs = eventsOnDay(cell.key);
+        var dayEvs = cell.outside ? [] : eventsOnDay(cell.key);
         var cls = 'day';
         if (cell.outside) cls += ' outside';
         if (cell.key === today) cls += ' is-today';
         if (selectedDay === cell.key) cls += ' selected-day';
         html += '<div class="' + cls + '" data-day="' + cell.key + '">';
-        html += '<div class="day-number">' + cell.date.getDate() + '</div>';
+        html += '<button type="button" class="day-number" aria-label="' + escapeHtml(dayLongFmt.format(cell.date)) + '">' + cell.date.getDate() + '</button>';
         if (dayEvs.length) {
           html += '<span class="mobile-dot">' + dayEvs.length + '</span>';
           html += '<div class="day-events">';
           dayEvs.slice(0, maxShow).forEach(function (ev) {
             var online = isOnline(ev);
-            html += '<button type="button" class="event-card' + (online ? '' : ' offline') + '" data-id="' + escapeHtml(ev.id) + '">' +
-              '<div class="event-top"><b>' + escapeHtml(ev.start || '') + '</b></div>' +
-              '<strong>' + escapeHtml(shortTitle(ev.title, 60)) + '</strong>' +
-              (ev.leader ? '<span class="event-host">' + escapeHtml(shortTitle(ev.leader, 28)) + '</span>' : '') +
+            html += '<button type="button" class="event-card ' + (online ? 'online' : 'offline') + '" data-id="' + escapeHtml(ev.id) + '">' +
+              '<span class="event-top"><b>' + escapeHtml(ev.start || '') + '</b>' + (online ? ICON_VIDEO : ICON_PIN) + '</span>' +
+              '<strong>' + escapeHtml(ev.title) + '</strong>' +
+              (ev.leader ? '<span class="event-host">' + escapeHtml(ev.leader) + '</span>' : '') +
               '</button>';
           });
           if (dayEvs.length > maxShow && maxShow > 0) {
-            html += '<button type="button" class="more" data-day="' + cell.key + '">ещё ' + (dayEvs.length - maxShow) + '</button>';
+            html += '<button type="button" class="more" data-day="' + cell.key + '">Ещё ' + (dayEvs.length - maxShow) + '</button>';
           }
           html += '</div>';
         }
@@ -1011,7 +1013,7 @@
       var y = cursor.getFullYear();
       var m = cursor.getMonth();
       var monthEvents = eventsInMonth(y, m);
-      monthTitle.textContent = monthFmt.format(cursor);
+      monthTitle.textContent = formatMonthTitle(cursor);
       monthCount.textContent = monthEvents.length + ' в этом месяце';
       if (!monthEvents.length) {
         listWrap.innerHTML =
@@ -1037,12 +1039,13 @@
       }
       var evs = eventsOnDay(selectedDay);
       dayDetails.classList.remove('hidden');
+      var heading = dayLongFmt.format(parseKey(selectedDay));
       if (!evs.length) {
-        dayDetails.innerHTML = '<h4>' + capitalize(dayLongFmt.format(parseKey(selectedDay))) + '</h4><p>В этот день мероприятий нет.</p>';
+        dayDetails.innerHTML = '<h4>' + escapeHtml(heading) + '</h4><p>На этот день встреч пока нет.</p>';
         return;
       }
-      dayDetails.innerHTML = '<h4>' + capitalize(dayLongFmt.format(parseKey(selectedDay))) + '</h4>' +
-        '<div class="event-list">' + evs.map(function (ev) { return listEventHtml(ev, false); }).join('') + '</div>';
+      dayDetails.innerHTML = '<h4>' + escapeHtml(heading) + '</h4>' +
+        '<div class="event-list">' + evs.map(function (ev) { return listEventHtml(ev, true); }).join('') + '</div>';
     }
 
     function render() {
@@ -1123,6 +1126,7 @@
       else helpDialog.setAttribute('open', '');
     });
     document.getElementById('close-help').addEventListener('click', function () { helpDialog.close(); });
+    document.getElementById('help-ok').addEventListener('click', function () { helpDialog.close(); });
     document.getElementById('close-event').addEventListener('click', function () { eventDialog.close(); });
     eventDialog.addEventListener('click', function (e) {
       if (e.target === eventDialog) eventDialog.close();
@@ -1143,7 +1147,13 @@
         renderCalendar();
         return;
       }
+      var dayBtn = e.target.closest('.day-number');
       var day = e.target.closest('.day[data-day]');
+      if (dayBtn && day) {
+        selectedDay = day.getAttribute('data-day');
+        renderCalendar();
+        return;
+      }
       if (day && window.matchMedia('(max-width: 700px)').matches) {
         selectedDay = day.getAttribute('data-day');
         renderCalendar();
