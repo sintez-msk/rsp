@@ -282,6 +282,8 @@
     .mobile-dot { display: none; }
     .more { text-align: left; color: #73608e; padding: 7px; font-size: 14px; }
     .day-details { display: none; }
+    .day-details .day-event-list { border-radius: 0; border: 0; }
+    .day-details .list-event { cursor: pointer; }
     .calendar-bottom {
       color: #99919e;
       justify-content: space-between;
@@ -459,7 +461,8 @@
     }
 
     @media (min-width: 701px) {
-      .day-details:has(.list-event) {
+      .day-details:has(.list-event),
+      .day-details:not(.hidden):has(.list-event) {
         background: #fff;
         border: 1px solid #e8e3ec;
         border-radius: 10px;
@@ -1012,6 +1015,21 @@
       });
       html += '</div></div>';
       calendarWrap.innerHTML = html;
+      bindOpenClicks(calendarWrap);
+      calendarWrap.querySelectorAll('.more[data-day], .mobile-dot[data-day], .day-number').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var day = btn.closest('.day[data-day]');
+          var key = btn.getAttribute('data-day') || (day && day.getAttribute('data-day'));
+          if (!key) return;
+          selectedDay = key;
+          renderCalendar();
+          if (window.matchMedia('(max-width: 700px)').matches && dayDetails) {
+            dayDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
       renderDayDetails();
     }
 
@@ -1033,20 +1051,37 @@
       }
       listWrap.innerHTML = '<div class="event-list">' +
         monthEvents.map(listEventHtml).join('') + '</div>';
+      bindOpenClicks(listWrap);
+    }
+
+    function bindOpenClicks(root) {
+      if (!root) return;
+      root.querySelectorAll('.list-event[data-id], .event-card[data-id]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          openEvent(btn.getAttribute('data-id'));
+        });
+      });
     }
 
     function renderDayDetails() {
       if (viewMode !== 'calendar' || !selectedDay) {
         dayDetails.innerHTML = '';
+        dayDetails.classList.add('hidden');
         return;
       }
       var evs = eventsOnDay(selectedDay);
       var heading = dayLongFmt.format(parseKey(selectedDay));
+      dayDetails.classList.remove('hidden');
       if (!evs.length) {
         dayDetails.innerHTML = '<h4>' + escapeHtml(heading) + '</h4><p>На этот день встреч пока нет.</p>';
         return;
       }
-      dayDetails.innerHTML = '<h4>' + escapeHtml(heading) + '</h4>' + evs.map(listEventHtml).join('');
+      dayDetails.innerHTML =
+        '<h4>' + escapeHtml(heading) + '</h4>' +
+        '<div class="event-list day-event-list">' + evs.map(listEventHtml).join('') + '</div>';
+      bindOpenClicks(dayDetails);
     }
 
     function render() {
@@ -1097,15 +1132,14 @@
       }
       eventDialog.innerHTML = html;
       try {
-        if (typeof eventDialog.showModal === 'function' && !eventDialog.open) eventDialog.showModal();
+        if (eventDialog.open) eventDialog.close();
+      } catch (eClose) {}
+      try {
+        if (typeof eventDialog.showModal === 'function') eventDialog.showModal();
         else eventDialog.setAttribute('open', '');
       } catch (err) {
         eventDialog.setAttribute('open', '');
-        eventDialog.style.display = 'block';
-        eventDialog.style.position = 'fixed';
-        eventDialog.style.inset = '0';
-        eventDialog.style.margin = 'auto';
-        eventDialog.style.zIndex = '9999';
+        eventDialog.style.cssText = 'display:block;position:fixed;inset:16px;margin:auto;z-index:9999;max-height:85vh;overflow:auto;';
       }
       eventDialog.scrollTop = 0;
     }
@@ -1151,33 +1185,7 @@
       if (e.target === helpDialog) helpDialog.close();
     });
 
-    document.addEventListener('click', function (e) {
-      if (e.target.closest('dialog')) return;
-      var card = e.target.closest('.event-card[data-id], .list-event[data-id]');
-      if (card) {
-        e.preventDefault();
-        openEvent(card.getAttribute('data-id'));
-        return;
-      }
-      var more = e.target.closest('.more[data-day], .mobile-dot[data-day]');
-      if (more) {
-        selectedDay = more.getAttribute('data-day');
-        renderCalendar();
-        var details = document.getElementById('day-details');
-        if (details) details.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        return;
-      }
-      var day = e.target.closest('.day[data-day]');
-      if (day && (e.target.closest('.day-number') || window.matchMedia('(max-width: 700px)').matches)) {
-        if (e.target.closest('.event-card')) return;
-        selectedDay = day.getAttribute('data-day');
-        renderCalendar();
-        var box = document.getElementById('day-details');
-        if (box && window.matchMedia('(max-width: 700px)').matches) {
-          box.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }
-    });
+    /* clicks on cards / day controls are bound in renderCalendar / renderDayDetails / renderList */
 
     loadSheetMatrix()
       .then(function (matrix) {
