@@ -1,32 +1,28 @@
 # Расписание синтез-деятельности
 
-Исходники веб-расписания (Google Apps Script + Google Таблицаца).
+Сайт на GitHub Pages читает события из Google Таблицы.
 
 ## Ссылки
 
-- **Таблица (редактирование):** https://docs.google.com/spreadsheets/d/1zdSZ-PkBbuHtGkHHaqgCSIHrF-50EJgoRftsVPVmd18/edit
-- **Страница онлайн:** https://script.google.com/macros/s/AKfycbzk94NQdranm7yvLdDCLbFpnerv_eFC4LbAgJAJeo4b7wZwB0Dq4HqZEuhtkSSIPVyY/exec
+- **Сайт (GitHub Pages):** https://sintez-msk.github.io/rsp/
+- **Таблица:** https://docs.google.com/spreadsheets/d/1zdSZ-PkBbuHtGkHHaqgCSIHrF-50EJgoRftsVPVmd18/edit
+- **Старый Apps Script (запасной):** https://script.google.com/macros/s/AKfycbzk94NQdranm7yvLdDCLbFpnerv_eFC4LbAgJAJeo4b7wZwB0Dq4HqZEuhtkSSIPVyY/exec
 
-## Как добавить мероприятие
+## Как править
 
-На листе **События** добавьте строку:
+Меняйте лист **События** в таблице → обновите сайт (F5). Деплой не нужен.
 
-`date | end_date | start | end | place | title | participants | leader | color`
+Таблица должна быть доступна как **«все, у кого есть ссылка — читатель»**.
 
-Для онлайн-встречи в `place` укажите URL, например:
+## GitHub Pages
 
-`Онлайн https://meet.google.com/xxx-xxxx-xxx`
+Settings → Pages → Branch `main`, folder **`/docs`** (предпочтительно) или `/ (root)`.
 
-Сохраните таблицу → обновите страницу (F5). Новый деплой не нужен.
-
-Если меняли `apps-script/Code.gs` или `Index.html` — в Apps Script нужен деплой новой версии.
-
-## Содержимое репозитория
+## Код
 
 | Путь | Назначение |
 |------|------------|
-| `apps-script/Code.gs` | Чтение таблицы, фильтр прошедших (Москва) |
-| `apps-script/Index.html` | Календарь + список |
-| `apps-script/appsscript.json` | Часовой пояс Europe/Moscow |
+| `docs/index.html` | Календарь + список на Pages |
+| `apps-script/` | Исходники Google Apps Script (бэкап) |
 
 Репозиторий: https://github.com/sintez-msk/rsp

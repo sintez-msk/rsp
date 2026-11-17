@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Расписание синтез-деятельности</title>
+  <style>
+    :root {
+      --bg: #f6f3ec;
+      --ink: #1f1a14;
+      --muted: #5c5348;
+      --line: #d9d0c2;
+      --paper: #fffdf8;
+      --accent: #3d5a4c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PT Sans", "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(ellipse at top, #fffaf0 0%, var(--bg) 55%, #ebe4d6 100%);
+      min-height: 100vh;
+    }
+    .wrap { width: min(1100px, calc(100% - 24px)); margin: 0 auto; padding: 20px 0 48px; }
+    header.page-header { margin-bottom: 18px; }
+    header.page-header h1 {
+      margin: 0 0 6px;
+      font-family: Georgia, "EB Garamond", "Times New Roman", serif;
+      font-weight: 600;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+    }
+    header.page-header p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    .status { margin: 12px 0 0; min-height: 1.3em; color: var(--muted); font-size: 0.9rem; }
+    .status.error { color: #8b1e1e; }
+    #calendar {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 28px;
+      box-shadow: 0 10px 30px rgba(50, 40, 20, 0.05);
+    }
+    .fc {
+      --fc-border-color: var(--line);
+      --fc-page-bg-color: transparent;
+      --fc-neutral-bg-color: #f3efe6;
+      --fc-button-bg-color: var(--accent);
+      --fc-button-border-color: var(--accent);
+      --fc-button-hover-bg-color: #2f463c;
+      --fc-button-hover-border-color: #2f463c;
+      --fc-button-active-bg-color: #24362e;
+      --fc-button-active-border-color: #24362e;
+      --fc-today-bg-color: rgba(61, 90, 76, 0.08);
+    }
+    .fc .fc-toolbar-title { font-size: 1.15rem; font-family: Georgia, serif; }
+    .fc .fc-event { border: none; color: var(--ink); font-size: 0.78rem; padding: 1px 3px; }
+    .fc .fc-list-event-title { white-space: normal; word-break: break-word; }
+    .fc .fc-list-event-time {
+      white-space: nowrap !important;
+      vertical-align: top;
+      min-width: 7.5rem;
+      width: 7.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .fc .fc-more-popover, .fc .fc-popover {
+      z-index: 50 !important;
+      background: #fffdf8 !important;
+      border: 1px solid var(--line) !important;
+      max-width: min(340px, calc(100vw - 24px));
+      max-height: min(50vh, 360px);
+      overflow: auto;
+    }
+    .day-block.is-target {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+      border-radius: 6px;
+      background: rgba(61, 90, 76, 0.06);
+    }
+    .list-section h2 {
+      margin: 0 0 14px;
+      font-family: Georgia, serif;
+      font-size: 1.35rem;
+      font-weight: 600;
+    }
+    .day-block { margin-bottom: 22px; }
+    .day-block h3 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border-bottom: 3px double #999;
+      padding-bottom: 4px;
+    }
+    table.events-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+    table.events-table th, table.events-table td {
+      vertical-align: top;
+      padding: 8px 10px;
+      border-bottom: 1px solid #cfc6b8;
+      text-align: left;
+    }
+    table.events-table th {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 600;
+      background: #f3efe6;
+    }
+    table.events-table .event-title {
+      display: block;
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    table.events-table .meta { color: var(--muted); font-size: 0.92rem; }
+    a.event-link {
+      color: #1f4d3a;
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      word-break: break-all;
+    }
+    .cards { display: none; }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      background: var(--paper);
+    }
+    .card .when { font-weight: 600; margin-bottom: 4px; }
+    .card .title { font-weight: 700; margin-bottom: 4px; }
+    .card .meta { color: var(--muted); font-size: 0.92rem; }
+    @media (max-width: 720px) {
+      .wrap { width: calc(100% - 16px); padding: 12px 0 32px; }
+      header.page-header h1 { font-size: 1.35rem; line-height: 1.25; }
+      table.events-table { display: none; }
+      .cards { display: block; }
+      #calendar { padding: 8px; margin-bottom: 18px; overflow: hidden; }
+      .fc .fc-toolbar { display: grid; grid-template-columns: 1fr; gap: 8px; }
+      .fc .fc-toolbar-chunk { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; }
+      .fc .fc-toolbar-title { font-size: 1rem; text-align: center; }
+      .fc .fc-button { padding: 0.35em 0.55em; font-size: 0.8rem; }
+      .fc .fc-daygrid-event {
+        font-size: 0.65rem; padding: 0 2px; white-space: nowrap;
+        overflow: hidden; text-overflow: ellipsis;
+      }
+      .fc .fc-list-event-time { min-width: 6.8rem; width: 6.8rem; font-size: 0.82rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="page-header">
+      <h1>Расписание синтез-деятельности</h1>
+      <p>Данные из Google Таблицы · только актуальные мероприятия</p>
+      <p class="status" id="status">Загрузка…</p>
+    </header>
+    <div id="calendar" aria-label="Календарь мероприятий"></div>
+    <section class="list-section" aria-label="Список мероприятий">
+      <h2>Список по дням</h2>
+      <div id="event-list"></div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales/ru.global.min.js"></script>
+  <script>
+    (function () {
+      var SPREADSHEET_ID = '1zdSZ-PkBbuHtGkHHaqgCSIHrF-50EJgoRftsVPVmd18';
+      var SHEET_NAME = 'События';
+      var STATUS_COLORS = {
+        'запланировано': '#dde7ee',
+        'в процессе': '#e7ebbc',
+        'завершено': '#e5e5e5'
+      };
+      var HEADER_ALIASES = {
+        date: ['date', 'дата'],
+        end_date: ['end_date', 'enddate', 'дата_конца', 'дата конца'],
+        start: ['start', 'начало', 'время', 'время_начала', 'время начала'],
+        end: ['end', 'конец', 'время_конца', 'время конца'],
+        place: ['place', 'место', 'площадка', 'формат'],
+        title: ['title', 'название', 'мероприятие', 'название мероприятия'],
+        participants: ['participants', 'участники', 'описание'],
+        leader: ['leader', 'ведущий', 'ведущие', 'спикер', 'спикер / организатор', 'организатор'],
+        color: ['color', 'цвет'],
+        link: ['link', 'ссылка', 'url', 'ссылка на подключение'],
+        status: ['status', 'статус']
+      };
+
+      var statusEl = document.getElementById('status');
+      var listEl = document.getElementById('event-list');
+      var calendar;
+      var weekdayFormatter = new Intl.DateTimeFormat('ru-RU', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+
+      function setStatus(text, isError) {
+        statusEl.textContent = text || '';
+        statusEl.classList.toggle('error', !!isError);
+      }
+
+      function pad2(n) {
+        var s = String(n);
+        return s.length < 2 ? '0' + s : s;
+      }
+
+      function nowMoscowStamp() {
+        var parts = new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Europe/Moscow',
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit', second: '2-digit',
+          hour12: false
+        }).formatToParts(new Date());
+        var get = function (t) {
+          for (var i = 0; i < parts.length; i++) if (parts[i].type === t) return parts[i].value;
+          return '00';
+        };
+        return get('year') + '-' + get('month') + '-' + get('day') + 'T' +
+          get('hour') + ':' + get('minute') + ':' + get('second');
+      }
+
+      function normalizeDate(value) {
+        if (value == null || value === '') return '';
+        var text = String(value).trim();
+        var iso = text.match(/^(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})/);
+        if (iso) return iso[1] + '-' + pad2(iso[2]) + '-' + pad2(iso[3]);
+        var dmy = text.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})/);
+        if (dmy) return dmy[3] + '-' + pad2(dmy[2]) + '-' + pad2(dmy[1]);
+        return '';
+      }
+
+      function normalizeTime(value) {
+        if (value == null || value === '') return '';
+        var text = String(value).trim();
+        var m = text.match(/^(\d{1,2})[:.](\d{2})/);
+        if (m) return pad2(m[1]) + ':' + m[2];
+        return '';
+      }
+
+      function combineDateTime(date, time) {
+        return date + 'T' + (time || '00:00') + ':00';
+      }
+
+      function extractUrl(text) {
+        var m = String(text || '').match(/https?:\/\/[^\s<>"']+/i);
+        return m ? m[0].replace(/[.,);]+$/g, '') : '';
+      }
+
+      function buildHeaderMap(headerRow) {
+        var normalized = {};
+        for (var c = 0; c < headerRow.length; c++) {
+          var key = String(headerRow[c] || '').trim().toLowerCase().replace(/\s+/g, ' ');
+          if (key) normalized[key] = c;
+        }
+        var map = {};
+        Object.keys(HEADER_ALIASES).forEach(function (field) {
+          map[field] = -1;
+          var aliases = HEADER_ALIASES[field];
+          for (var i = 0; i < aliases.length; i++) {
+            if (normalized.hasOwnProperty(aliases[i].toLowerCase())) {
+              map[field] = normalized[aliases[i].toLowerCase()];
+              break;
+            }
+          }
+        });
+        return map;
+      }
+
+      function detectHeader(values) {
+        for (var r = 0; r < Math.min(values.length, 30); r++) {
+          var map = buildHeaderMap(values[r]);
+          if (map.title >= 0) {
+            if (map.date < 0 && map.title >= 2) map.date = map.title - 2;
+            if (map.start < 0 && map.title >= 1) map.start = map.title - 1;
+            if (map.date >= 0) return { map: map, dataStart: r + 1 };
+          }
+        }
+        throw new Error('Не найдены заголовки (дата и название).');
+      }
+
+      function cellString(row, index) {
+        if (index == null || index < 0 || index >= row.length) return '';
+        var value = row[index];
+        return value == null ? '' : String(value).trim();
+      }
+
+      function rowsToEvents(values) {
+        var headerInfo = detectHeader(values);
+        var events = [];
+        var nowMoscow = nowMoscowStamp();
+
+        for (var r = headerInfo.dataStart; r < values.length; r++) {
+          var row = values[r];
+          var title = cellString(row, headerInfo.map.title);
+          var date = normalizeDate(row[headerInfo.map.date]);
+          if (!title || !date) continue;
+
+          var endDate = normalizeDate(row[headerInfo.map.end_date]);
+          var startTime = normalizeTime(row[headerInfo.map.start]);
+          var endTime = normalizeTime(row[headerInfo.map.end]);
+          var place = cellString(row, headerInfo.map.place);
+          var link = cellString(row, headerInfo.map.link) || extractUrl(place);
+          var status = cellString(row, headerInfo.map.status);
+          var participants = cellString(row, headerInfo.map.participants);
+          var leader = cellString(row, headerInfo.map.leader);
+          var color = cellString(row, headerInfo.map.color);
+
+          if (link && place) {
+            place = place.split(link).join(' ').replace(/\s*[·|]\s*/g, ' ').replace(/\s+/g, ' ').trim();
+          }
+          if (!place && link) place = 'Онлайн';
+
+          if (status && participants) participants = status + ' · ' + participants;
+          else if (status) participants = status;
+
+          if (!color) color = STATUS_COLORS[(status || '').toLowerCase()] || '#dde7ee';
+
+          var startIso = combineDateTime(date, startTime || '00:00');
+          var endIsoDate = endDate || date;
+          var endIso = combineDateTime(endIsoDate, endTime || startTime || '00:00');
+          var endForFilter = combineDateTime(endIsoDate, endTime || '23:59');
+          if (endForFilter < nowMoscow) continue;
+
+          events.push({
+            id: String(r),
+            title: title,
+            date: date,
+            endDate: endDate && endDate !== date ? endDate : '',
+            start: startTime,
+            end: endTime,
+            place: place,
+            link: link,
+            participants: participants,
+            leader: leader,
+            color: color,
+            startIso: startIso,
+            endIso: endIso
+          });
+        }
+
+        events.sort(function (a, b) {
+          if (a.startIso < b.startIso) return -1;
+          if (a.startIso > b.startIso) return 1;
+          return a.title.localeCompare(b.title, 'ru');
+        });
+        return events;
+      }
+
+      function gvizToMatrix(response) {
+        var table = response && response.table;
+        if (!table) throw new Error('Пустой ответ таблицы');
+        var values = [];
+        var header = (table.cols || []).map(function (col) {
+          return (col && (col.label || col.id)) || '';
+        });
+        values.push(header);
+        (table.rows || []).forEach(function (row) {
+          var cells = row.c || [];
+          values.push(cells.map(function (cell) {
+            if (!cell) return '';
+            if (cell.f != null && String(cell.f).trim() !== '') return String(cell.f);
+            if (cell.v == null) return '';
+            return String(cell.v);
+          }));
+        });
+        return values;
+      }
+
+      function loadSheetMatrix() {
+        return new Promise(function (resolve, reject) {
+          var cbName = '__gvizCb_' + Date.now();
+          var script = document.createElement('script');
+          var timer = setTimeout(function () {
+            cleanup();
+            reject(new Error('Таймаут загрузки Google Таблицы'));
+          }, 25000);
+
+          function cleanup() {
+            clearTimeout(timer);
+            try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+            if (script.parentNode) script.parentNode.removeChild(script);
+          }
+
+          window[cbName] = function (response) {
+            try {
+              resolve(gvizToMatrix(response));
+            } catch (err) {
+              reject(err);
+            } finally {
+              cleanup();
+            }
+          };
+
+          script.onerror = function () {
+            cleanup();
+            reject(new Error('Не удалось загрузить таблицу (проверьте доступ «по ссылке — читатель»)'))
+          };
+          script.src =
+            'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID +
+            '/gviz/tq?tqx=out:json;responseHandler:' + cbName +
+            '&sheet=' + encodeURIComponent(SHEET_NAME);
+          document.body.appendChild(script);
+        });
+      }
+
+      function capitalize(s) {
+        return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+      }
+
+      function formatDayHeading(dateStr) {
+        return capitalize(weekdayFormatter.format(new Date(dateStr + 'T12:00:00')));
+      }
+
+      function shortTitle(title, maxLen) {
+        var t = String(title || '').trim();
+        return t.length <= maxLen ? t : t.slice(0, maxLen - 1).trim() + '…';
+      }
+
+      function toDateKey(date) {
+        if (!date) return '';
+        if (typeof date === 'string') return date.slice(0, 10);
+        return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+      }
+
+      function scrollToDay(dateLike) {
+        var key = toDateKey(dateLike);
+        if (!key) return;
+        var target = document.getElementById('day-' + key);
+        if (!target) return;
+        document.querySelectorAll('.day-block.is-target').forEach(function (el) {
+          el.classList.remove('is-target');
+        });
+        target.classList.add('is-target');
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function toCalendarEvents(events, compact) {
+        return events.map(function (ev) {
+          return {
+            id: ev.id,
+            title: compact ? shortTitle(ev.title, 42) : ev.title,
+            start: ev.startIso,
+            end: ev.endIso,
+            backgroundColor: ev.color || '#dde7ee',
+            borderColor: ev.color || '#dde7ee',
+            textColor: '#1f1a14',
+            extendedProps: { fullTitle: ev.title, date: ev.date }
+          };
+        });
+      }
+
+      function groupByDate(events) {
+        var groups = {};
+        events.forEach(function (ev) {
+          if (!groups[ev.date]) groups[ev.date] = [];
+          groups[ev.date].push(ev);
+        });
+        return Object.keys(groups).sort().map(function (date) {
+          return { date: date, events: groups[date] };
+        });
+      }
+
+      function escapeHtml(text) {
+        return String(text || '')
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function safeHref(url) {
+        return /^https?:\/\//i.test(url || '') ? escapeHtml(url) : '';
+      }
+
+      function formatPlaceHtml(place, link) {
+        var url = link || extractUrl(place);
+        var label = String(place || '').trim();
+        if (url && label) label = label.split(url).join(' ').replace(/\s+/g, ' ').trim();
+        var href = safeHref(url);
+        if (href) {
+          if (!label || /^(онлайн|online)$/i.test(label)) {
+            return '<a class="event-link" href="' + href + '" target="_blank" rel="noopener noreferrer">Онлайн</a>';
+          }
+          return escapeHtml(label) +
+            ' · <a class="event-link" href="' + href + '" target="_blank" rel="noopener noreferrer">подключиться</a>';
+        }
+        if (!label) return '';
+        var embedded = extractUrl(label);
+        if (embedded) {
+          var h = safeHref(embedded);
+          return escapeHtml(label).replace(
+            escapeHtml(embedded),
+            '<a class="event-link" href="' + h + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(embedded) + '</a>'
+          );
+        }
+        return escapeHtml(label);
+      }
+
+      function timeLabel(ev) {
+        if (ev.start && ev.end) return escapeHtml(ev.start + '–' + ev.end);
+        if (ev.start) return escapeHtml(ev.start);
+        return '';
+      }
+
+      function renderList(events) {
+        var groups = groupByDate(events);
+        if (!groups.length) {
+          listEl.innerHTML = '<p class="status">В таблице пока нет актуальных событий.</p>';
+          return;
+        }
+        listEl.innerHTML = groups.map(function (group) {
+          var rows = group.events.map(function (ev) {
+            var when = timeLabel(ev);
+            var placeHtml = formatPlaceHtml(ev.place, ev.link);
+            var title = escapeHtml(ev.title);
+            var participants = escapeHtml(ev.participants);
+            var leader = escapeHtml(ev.leader);
+            var color = escapeHtml(ev.color || '#dde7ee');
+            var endNote = ev.endDate ? '<div class="meta">до ' + escapeHtml(ev.endDate) + '</div>' : '';
+            var tableRow =
+              '<tr style="background:' + color + '">' +
+                '<td style="width:28%">' + (when ? when + '<br>' : '') +
+                  (placeHtml ? '<span class="meta">' + placeHtml + '</span>' : '') + endNote + '</td>' +
+                '<td style="width:44%"><span class="event-title">' + title + '</span>' +
+                  (participants ? '<div class="meta">Участники: ' + participants + '</div>' : '') + '</td>' +
+                '<td style="width:28%">' + leader + '</td></tr>';
+            var card =
+              '<article class="card" style="background:' + color + '">' +
+                '<div class="when">' + when + (placeHtml ? ' · ' + placeHtml : '') + '</div>' +
+                '<div class="title">' + title + '</div>' +
+                (participants ? '<div class="meta">Участники: ' + participants + '</div>' : '') +
+                (leader ? '<div class="meta">Ведущий: ' + leader + '</div>' : '') +
+                (ev.endDate ? '<div class="meta">до ' + escapeHtml(ev.endDate) + '</div>' : '') +
+              '</article>';
+            return { tableRow: tableRow, card: card };
+          });
+          return (
+            '<section class="day-block" id="day-' + escapeHtml(group.date) + '">' +
+              '<h3>' + escapeHtml(formatDayHeading(group.date)) + '</h3>' +
+              '<table class="events-table"><thead><tr>' +
+                '<th scope="col">Время/Место</th><th scope="col">Мероприятие/Участники</th><th scope="col">Ведущий</th>' +
+              '</tr></thead><tbody>' + rows.map(function (r) { return r.tableRow; }).join('') + '</tbody></table>' +
+              '<div class="cards">' + rows.map(function (r) { return r.card; }).join('') + '</div></section>'
+          );
+        }).join('');
+      }
+
+      function isMobile() {
+        return window.matchMedia('(max-width: 720px)').matches;
+      }
+
+      function initCalendar(events) {
+        var el = document.getElementById('calendar');
+        var mobile = isMobile();
+        calendar = new FullCalendar.Calendar(el, {
+          locale: 'ru',
+          timeZone: 'local',
+          initialView: mobile ? 'listMonth' : 'dayGridMonth',
+          headerToolbar: mobile
+            ? { left: 'prev,next', center: 'title', right: 'listMonth,dayGridMonth' }
+            : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,listMonth' },
+          height: 'auto',
+          contentHeight: 'auto',
+          firstDay: 1,
+          displayEventEnd: true,
+          dayMaxEvents: mobile ? 2 : 4,
+          moreLinkClick: function (info) {
+            if (info.jsEvent) info.jsEvent.preventDefault();
+            scrollToDay(info.date);
+          },
+          eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+          views: {
+            dayGridMonth: { buttonText: 'Сетка', dayMaxEventRows: mobile ? 2 : 4, eventDisplay: 'block' },
+            listMonth: {
+              buttonText: 'Список',
+              listDayFormat: { weekday: 'long', day: 'numeric', month: 'long' },
+              listDaySideFormat: false,
+              displayEventEnd: true,
+              eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false }
+            },
+            timeGridWeek: { buttonText: 'Неделя' }
+          },
+          events: toCalendarEvents(events, mobile),
+          eventClick: function (info) {
+            info.jsEvent.preventDefault();
+            var date = (info.event.extendedProps && info.event.extendedProps.date) ||
+              (info.event.startStr || '').slice(0, 10);
+            scrollToDay(date);
+          },
+          dateClick: function (info) { scrollToDay(info.date); }
+        });
+        calendar.render();
+
+        var mq = window.matchMedia('(max-width: 720px)');
+        var onViewportChange = function () {
+          if (!calendar) return;
+          if (mq.matches) {
+            calendar.setOption('headerToolbar', {
+              left: 'prev,next', center: 'title', right: 'listMonth,dayGridMonth'
+            });
+            calendar.setOption('dayMaxEvents', 2);
+            if (calendar.view.type === 'timeGridWeek') calendar.changeView('listMonth');
+          } else {
+            calendar.setOption('headerToolbar', {
+              left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,listMonth'
+            });
+            calendar.setOption('dayMaxEvents', 4);
+          }
+        };
+        if (mq.addEventListener) mq.addEventListener('change', onViewportChange);
+        else if (mq.addListener) mq.addListener(onViewportChange);
+      }
+
+      loadSheetMatrix()
+        .then(function (matrix) {
+          var events = rowsToEvents(matrix);
+          initCalendar(events);
+          renderList(events);
+          setStatus('Событий: ' + events.length);
+        })
+        .catch(function (err) {
+          setStatus('Не удалось загрузить данные: ' + (err && err.message ? err.message : err), true);
+        });
+    })();
+  </script>
+</body>
+</html>
