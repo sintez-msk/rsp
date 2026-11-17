@@ -1,0 +1,26 @@
+# Скачанные файлы и очереди даунлоадера
+скачано_с_сайта/
+очередь_скачивания.json
+очередь_скачивания.json.tmp
+история_скачивания.json
+скачивание.log
+*.part
+
+# Python / локальное
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.*
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+
+# Временные
+*.tmp
+*.bak

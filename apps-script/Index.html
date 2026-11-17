@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Расписание синтез-деятельности</title>
+  <style>
+    :root {
+      --bg: #f6f3ec;
+      --ink: #1f1a14;
+      --muted: #5c5348;
+      --line: #d9d0c2;
+      --paper: #fffdf8;
+      --accent: #3d5a4c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PT Sans", "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at top, #fffaf0 0%, var(--bg) 55%, #ebe4d6 100%);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      width: min(1100px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 20px 0 48px;
+    }
+
+    header.page-header {
+      margin-bottom: 18px;
+    }
+
+    header.page-header h1 {
+      margin: 0 0 6px;
+      font-family: Georgia, "EB Garamond", "Times New Roman", serif;
+      font-weight: 600;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      letter-spacing: 0.01em;
+    }
+
+    header.page-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .status {
+      margin: 12px 0 0;
+      min-height: 1.3em;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .status.error { color: #8b1e1e; }
+
+    #calendar {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 28px;
+      box-shadow: 0 10px 30px rgba(50, 40, 20, 0.05);
+    }
+
+    .fc {
+      --fc-border-color: var(--line);
+      --fc-page-bg-color: transparent;
+      --fc-neutral-bg-color: #f3efe6;
+      --fc-button-bg-color: var(--accent);
+      --fc-button-border-color: var(--accent);
+      --fc-button-hover-bg-color: #2f463c;
+      --fc-button-hover-border-color: #2f463c;
+      --fc-button-active-bg-color: #24362e;
+      --fc-button-active-border-color: #24362e;
+      --fc-today-bg-color: rgba(61, 90, 76, 0.08);
+    }
+
+    .fc .fc-toolbar-title {
+      font-size: 1.15rem;
+      font-family: Georgia, serif;
+    }
+
+    .fc .fc-event {
+      border: none;
+      color: var(--ink);
+      font-size: 0.78rem;
+      padding: 1px 3px;
+    }
+
+    .fc .fc-list-event-title {
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .fc .fc-list-event-time {
+      white-space: nowrap !important;
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+      vertical-align: top;
+      min-width: 7.5rem;
+      width: 7.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .fc .fc-list-day-cushion {
+      font-weight: 700;
+    }
+
+    /* Попап «+ ещё» — если вдруг откроется */
+    .fc .fc-more-popover,
+    .fc .fc-popover {
+      z-index: 50 !important;
+      background: #fffdf8 !important;
+      border: 1px solid var(--line) !important;
+      box-shadow: 0 12px 28px rgba(40, 30, 15, 0.18) !important;
+      max-width: min(340px, calc(100vw - 24px));
+      max-height: min(50vh, 360px);
+      overflow: auto;
+    }
+
+    .fc .fc-more-popover .fc-popover-body,
+    .fc .fc-popover .fc-popover-body {
+      padding: 8px;
+    }
+
+    .fc .fc-more-popover .fc-event,
+    .fc .fc-popover .fc-event {
+      white-space: normal !important;
+      margin: 4px 0;
+      display: block;
+    }
+
+    .day-block.is-target {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+      border-radius: 6px;
+      background: rgba(61, 90, 76, 0.06);
+    }
+
+    .list-section h2 {
+      margin: 0 0 14px;
+      font-family: Georgia, serif;
+      font-size: 1.35rem;
+      font-weight: 600;
+    }
+
+    .day-block {
+      margin-bottom: 22px;
+    }
+
+    .day-block h3 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border-bottom: 3px double #999;
+      padding-bottom: 4px;
+    }
+
+    table.events-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    table.events-table th,
+    table.events-table td {
+      vertical-align: top;
+      padding: 8px 10px;
+      border-bottom: 1px solid #cfc6b8;
+      text-align: left;
+    }
+
+    table.events-table th {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 600;
+      background: #f3efe6;
+    }
+
+    table.events-table .event-title {
+      display: block;
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    table.events-table .meta {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    a.event-link {
+      color: #1f4d3a;
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      word-break: break-all;
+    }
+
+    a.event-link:hover {
+      color: #0f2e22;
+    }
+
+    .cards {
+      display: none;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      background: var(--paper);
+    }
+
+    .card .when {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .card .title {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .card .meta {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 720px) {
+      .wrap {
+        width: calc(100% - 16px);
+        padding: 12px 0 32px;
+      }
+
+      header.page-header h1 {
+        font-size: 1.35rem;
+        line-height: 1.25;
+      }
+
+      header.page-header p {
+        font-size: 0.85rem;
+      }
+
+      table.events-table { display: none; }
+      .cards { display: block; }
+      #calendar {
+        padding: 8px;
+        margin-bottom: 18px;
+        overflow: hidden;
+      }
+
+      .fc .fc-toolbar {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-bottom: 0.75em;
+      }
+
+      .fc .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .fc .fc-toolbar-title {
+        font-size: 1rem;
+        text-align: center;
+      }
+
+      .fc .fc-button {
+        padding: 0.35em 0.55em;
+        font-size: 0.8rem;
+      }
+
+      /* Сетка месяца на узком экране: только точки/кратко */
+      .fc .fc-daygrid-event {
+        font-size: 0.65rem;
+        padding: 0 2px;
+        margin: 1px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .fc .fc-daygrid-day-number {
+        font-size: 0.75rem;
+        padding: 2px 4px;
+      }
+
+      .fc .fc-col-header-cell-cushion {
+        font-size: 0.7rem;
+        padding: 4px 2px;
+      }
+
+      .fc .fc-list {
+        font-size: 0.9rem;
+      }
+
+      .fc .fc-list-event td {
+        padding: 10px 8px;
+        vertical-align: top;
+      }
+
+      .fc .fc-list-event-time {
+        min-width: 6.8rem;
+        width: 6.8rem;
+        max-width: 40%;
+        white-space: nowrap !important;
+        word-break: normal !important;
+        font-size: 0.82rem;
+      }
+
+      .fc .fc-list-event-title a,
+      .fc .fc-list-event-title {
+        display: block;
+        line-height: 1.35;
+      }
+
+      .card {
+        padding: 12px;
+      }
+
+      .card .title {
+        font-size: 0.98rem;
+        line-height: 1.35;
+        word-break: break-word;
+      }
+
+      .card .when,
+      .card .meta {
+        font-size: 0.86rem;
+        line-height: 1.35;
+        word-break: break-word;
+      }
+    }
+
+    @media print {
+      body { background: #fff; }
+      #calendar { break-inside: avoid; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="page-header">
+      <h1>Расписание синтез-деятельности</h1>
+      <p>Данные из Google Таблицы · только актуальные мероприятия</p>
+      <p class="status" id="status">Загрузка…</p>
+    </header>
+
+    <div id="calendar" aria-label="Календарь мероприятий"></div>
+
+    <section class="list-section" aria-label="Список мероприятий">
+      <h2>Список по дням</h2>
+      <div id="event-list"></div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales/ru.global.min.js"></script>
+  <script>
+    (function () {
+      const statusEl = document.getElementById('status');
+      const listEl = document.getElementById('event-list');
+      let calendar;
+
+      const weekdayFormatter = new Intl.DateTimeFormat('ru-RU', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+
+      function setStatus(text, isError) {
+        statusEl.textContent = text || '';
+        statusEl.classList.toggle('error', !!isError);
+      }
+
+      function capitalize(s) {
+        return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+      }
+
+      function formatDayHeading(dateStr) {
+        const d = new Date(dateStr + 'T12:00:00');
+        return capitalize(weekdayFormatter.format(d));
+      }
+
+      function shortTitle(title, maxLen) {
+        const t = String(title || '').trim();
+        if (t.length <= maxLen) return t;
+        return t.slice(0, maxLen - 1).trim() + '…';
+      }
+
+      function toDateKey(date) {
+        if (!date) return '';
+        if (typeof date === 'string') return date.slice(0, 10);
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + d;
+      }
+
+      function scrollToDay(dateLike) {
+        const key = toDateKey(dateLike);
+        if (!key) return;
+        const target = document.getElementById('day-' + key);
+        if (!target) return;
+        document.querySelectorAll('.day-block.is-target').forEach(function (el) {
+          el.classList.remove('is-target');
+        });
+        target.classList.add('is-target');
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function toCalendarEvents(events, compact) {
+        return events.map(function (ev) {
+          return {
+            id: ev.id,
+            title: compact ? shortTitle(ev.title, 42) : ev.title,
+            start: ev.startIso,
+            end: ev.endIso,
+            backgroundColor: ev.color || '#dde7ee',
+            borderColor: ev.color || '#dde7ee',
+            textColor: '#1f1a14',
+            extendedProps: {
+              fullTitle: ev.title,
+              date: ev.date
+            }
+          };
+        });
+      }
+
+      function groupByDate(events) {
+        const groups = {};
+        events.forEach(function (ev) {
+          // List shows the start date; multi-day noted in the row.
+          const key = ev.date;
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(ev);
+        });
+        return Object.keys(groups).sort().map(function (date) {
+          return { date: date, events: groups[date] };
+        });
+      }
+
+      function escapeHtml(text) {
+        return String(text || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function extractUrl(text) {
+        const m = String(text || '').match(/https?:\/\/[^\s<>"']+/i);
+        return m ? m[0].replace(/[.,);]+$/g, '') : '';
+      }
+
+      function safeHref(url) {
+        if (!/^https?:\/\//i.test(url || '')) return '';
+        return escapeHtml(url);
+      }
+
+      /** Место + ссылка: «Онлайн» становится кликабельным. */
+      function formatPlaceHtml(place, link) {
+        const url = link || extractUrl(place);
+        let label = String(place || '').trim();
+        if (url && label) {
+          label = label.split(url).join(' ').replace(/\s+/g, ' ').trim();
+        }
+        const href = safeHref(url);
+        if (href) {
+          if (!label || /^(онлайн|online)$/i.test(label)) {
+            return '<a class="event-link" href="' + href + '" target="_blank" rel="noopener noreferrer">Онлайн</a>';
+          }
+          return (
+            escapeHtml(label) +
+            ' · <a class="event-link" href="' + href + '" target="_blank" rel="noopener noreferrer">подключиться</a>'
+          );
+        }
+        // Если в тексте места всё же есть URL — сделаем его ссылкой.
+        if (!label) return '';
+        const embedded = extractUrl(label);
+        if (embedded) {
+          const h = safeHref(embedded);
+          return escapeHtml(label).replace(
+            escapeHtml(embedded),
+            '<a class="event-link" href="' + h + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(embedded) + '</a>'
+          );
+        }
+        return escapeHtml(label);
+      }
+
+      function timeLabel(ev) {
+        if (ev.start && ev.end) return escapeHtml(ev.start + '–' + ev.end);
+        if (ev.start) return escapeHtml(ev.start);
+        return '';
+      }
+
+      function renderList(events) {
+        const groups = groupByDate(events);
+        if (!groups.length) {
+          listEl.innerHTML = '<p class="status">В таблице пока нет событий.</p>';
+          return;
+        }
+
+        listEl.innerHTML = groups.map(function (group) {
+          const rows = group.events.map(function (ev) {
+            const when = timeLabel(ev);
+            const placeHtml = formatPlaceHtml(ev.place, ev.link);
+            const title = escapeHtml(ev.title);
+            const participants = escapeHtml(ev.participants);
+            const leader = escapeHtml(ev.leader);
+            const color = escapeHtml(ev.color || '#dde7ee');
+            const endNote = ev.endDate
+              ? '<div class="meta">до ' + escapeHtml(ev.endDate) + '</div>'
+              : '';
+
+            const tableRow =
+              '<tr style="background:' + color + '">' +
+                '<td style="width:28%">' +
+                  (when ? when + '<br>' : '') +
+                  (placeHtml ? '<span class="meta">' + placeHtml + '</span>' : '') +
+                  endNote +
+                '</td>' +
+                '<td style="width:44%">' +
+                  '<span class="event-title">' + title + '</span>' +
+                  (participants ? '<div class="meta">Участники: ' + participants + '</div>' : '') +
+                '</td>' +
+                '<td style="width:28%">' + leader + '</td>' +
+              '</tr>';
+
+            const card =
+              '<article class="card" style="background:' + color + '">' +
+                '<div class="when">' + when + (placeHtml ? ' · ' + placeHtml : '') + '</div>' +
+                '<div class="title">' + title + '</div>' +
+                (participants ? '<div class="meta">Участники: ' + participants + '</div>' : '') +
+                (leader ? '<div class="meta">Ведущий: ' + leader + '</div>' : '') +
+                (ev.endDate ? '<div class="meta">до ' + escapeHtml(ev.endDate) + '</div>' : '') +
+              '</article>';
+
+            return { tableRow: tableRow, card: card };
+          });
+
+          return (
+            '<section class="day-block" id="day-' + escapeHtml(group.date) + '">' +
+              '<h3>' + escapeHtml(formatDayHeading(group.date)) + '</h3>' +
+              '<table class="events-table">' +
+                '<thead><tr>' +
+                  '<th scope="col">Время/Место</th>' +
+                  '<th scope="col">Мероприятие/Участники</th>' +
+                  '<th scope="col">Ведущий</th>' +
+                '</tr></thead>' +
+                '<tbody>' + rows.map(function (r) { return r.tableRow; }).join('') + '</tbody>' +
+              '</table>' +
+              '<div class="cards">' + rows.map(function (r) { return r.card; }).join('') + '</div>' +
+            '</section>'
+          );
+        }).join('');
+      }
+
+      function isMobile() {
+        return window.matchMedia('(max-width: 720px)').matches;
+      }
+
+      function initCalendar(events) {
+        const el = document.getElementById('calendar');
+        const mobile = isMobile();
+
+        calendar = new FullCalendar.Calendar(el, {
+          locale: 'ru',
+          // Время из таблицы без конвертации (как введено).
+          timeZone: 'local',
+          initialView: mobile ? 'listMonth' : 'dayGridMonth',
+          headerToolbar: mobile
+            ? {
+                left: 'prev,next',
+                center: 'title',
+                right: 'listMonth,dayGridMonth'
+              }
+            : {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listMonth'
+              },
+          height: 'auto',
+          contentHeight: 'auto',
+          firstDay: 1,
+          displayEventEnd: true,
+          dayMaxEvents: mobile ? 2 : 4,
+          // Вместо кривого попапа — прыжок к подробному списку дня.
+          moreLinkClick: function (info) {
+            if (info.jsEvent) info.jsEvent.preventDefault();
+            scrollToDay(info.date);
+          },
+          eventTimeFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          },
+          views: {
+            dayGridMonth: {
+              buttonText: 'Сетка',
+              dayMaxEventRows: mobile ? 2 : 4,
+              eventDisplay: 'block'
+            },
+            listMonth: {
+              buttonText: 'Список',
+              listDayFormat: { weekday: 'long', day: 'numeric', month: 'long' },
+              listDaySideFormat: false,
+              displayEventEnd: true,
+              eventTimeFormat: {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+              }
+            },
+            timeGridWeek: {
+              buttonText: 'Неделя'
+            }
+          },
+          events: toCalendarEvents(events, mobile),
+          eventClick: function (info) {
+            info.jsEvent.preventDefault();
+            const date =
+              (info.event.extendedProps && info.event.extendedProps.date) ||
+              (info.event.startStr || '').slice(0, 10);
+            scrollToDay(date);
+          },
+          dateClick: function (info) {
+            scrollToDay(info.date);
+          }
+        });
+        calendar.render();
+
+        // При повороте экрана переключаем удобный вид.
+        const mq = window.matchMedia('(max-width: 720px)');
+        const onViewportChange = function () {
+          if (!calendar) return;
+          if (mq.matches) {
+            calendar.setOption('headerToolbar', {
+              left: 'prev,next',
+              center: 'title',
+              right: 'listMonth,dayGridMonth'
+            });
+            calendar.setOption('dayMaxEvents', 2);
+            if (calendar.view.type === 'timeGridWeek') {
+              calendar.changeView('listMonth');
+            }
+          } else {
+            calendar.setOption('headerToolbar', {
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,listMonth'
+            });
+            calendar.setOption('dayMaxEvents', 4);
+          }
+        };
+        if (mq.addEventListener) mq.addEventListener('change', onViewportChange);
+        else if (mq.addListener) mq.addListener(onViewportChange);
+      }
+
+      function onLoaded(events) {
+        try {
+          initCalendar(events || []);
+          renderList(events || []);
+          setStatus('Событий: ' + (events ? events.length : 0));
+        } catch (err) {
+          setStatus('Ошибка отрисовки: ' + err.message, true);
+        }
+      }
+
+      function onFailed(err) {
+        setStatus('Не удалось загрузить данные: ' + (err && err.message ? err.message : err), true);
+      }
+
+      google.script.run
+        .withSuccessHandler(onLoaded)
+        .withFailureHandler(onFailed)
+        .getEvents();
+    })();
+  </script>
+</body>
+</html>
