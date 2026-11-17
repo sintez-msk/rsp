@@ -118,12 +118,26 @@
       background: #f3efe6;
     }
     table.events-table .event-title {
-      display: block;
-      text-align: center;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      text-align: left;
       font-weight: 700;
       margin-bottom: 4px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
     }
     table.events-table .meta { color: var(--muted); font-size: 0.92rem; }
+    table.events-table .meta.clamp,
+    .card .meta.clamp {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
     a.event-link {
       color: #1f4d3a;
       font-weight: 600;
@@ -139,9 +153,27 @@
       margin-bottom: 8px;
       background: var(--paper);
     }
-    .card .when { font-weight: 600; margin-bottom: 4px; }
-    .card .title { font-weight: 700; margin-bottom: 4px; }
-    .card .meta { color: var(--muted); font-size: 0.92rem; }
+    .card .when { font-weight: 600; margin-bottom: 4px; font-size: 0.92rem; }
+    .card .title {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
+      font-weight: 700;
+      margin-bottom: 4px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+    .card .meta { color: var(--muted); font-size: 0.88rem; line-height: 1.35; }
+    .fc .fc-daygrid-event .fc-event-title {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.2;
+    }
     @media (max-width: 720px) {
       .wrap { width: calc(100% - 16px); padding: 12px 0 32px; }
       header.page-header h1 { font-size: 1.35rem; line-height: 1.25; }
@@ -171,7 +203,7 @@
       <h1>Расписание синтез-деятельности</h1>
       <p class="status" id="status">Загрузка…</p>
       <p style="margin:10px 0 0;font-size:.9rem;">
-        <a href="./v2/" style="color:#1f4d3a;font-weight:600;text-underline-offset:2px;">Новый дизайн (тест)</a>
+        <a href="./v2/" style="color:#1f4d3a;font-weight:600;text-underline-offset:2px;">Новый дизайн расписания (тест)</a>
       </p>
     </header>
     <div id="calendar" aria-label="Календарь мероприятий"></div>
@@ -446,7 +478,7 @@
 
       function toCalendarEvents(events, compact) {
         return events.map(function (ev) {
-          var label = compact ? shortTitle(ev.title, 48) : ev.title;
+          var label = shortTitle(ev.title, compact ? 36 : 52);
           if (ev.start) label = ev.start + ' ' + label;
           return {
             id: ev.id,
@@ -524,24 +556,29 @@
           var rows = group.events.map(function (ev) {
             var when = timeLabel(ev);
             var placeHtml = formatPlaceHtml(ev.place, ev.link);
-            var title = escapeHtml(ev.title);
-            var participants = escapeHtml(ev.participants);
-            var leader = escapeHtml(ev.leader);
+            var fullTitle = String(ev.title || '');
+            var title = escapeHtml(fullTitle);
+            var titleAttr = fullTitle.length > 90 ? ' title="' + escapeHtml(fullTitle) + '"' : '';
+            var participantsRaw = String(ev.participants || '');
+            var participants = escapeHtml(participantsRaw);
+            var participantsAttr = participantsRaw.length > 100 ? ' title="' + escapeHtml(participantsRaw) + '"' : '';
+            var leader = escapeHtml(shortTitle(ev.leader, 80));
+            var leaderAttr = String(ev.leader || '').length > 80 ? ' title="' + escapeHtml(ev.leader) + '"' : '';
             var color = escapeHtml(ev.color || '#dde7ee');
             var endNote = ev.endDate ? '<div class="meta">до ' + escapeHtml(ev.endDate) + '</div>' : '';
             var tableRow =
               '<tr style="background:' + color + '">' +
                 '<td style="width:28%">' + (when ? when + '<br>' : '') +
                   (placeHtml ? '<span class="meta">' + placeHtml + '</span>' : '') + endNote + '</td>' +
-                '<td style="width:44%"><span class="event-title">' + title + '</span>' +
-                  (participants ? '<div class="meta">Участники: ' + participants + '</div>' : '') + '</td>' +
-                '<td style="width:28%">' + leader + '</td></tr>';
+                '<td style="width:44%"><span class="event-title"' + titleAttr + '>' + title + '</span>' +
+                  (participants ? '<div class="meta clamp"' + participantsAttr + '>Участники: ' + participants + '</div>' : '') + '</td>' +
+                '<td style="width:28%"' + leaderAttr + '>' + leader + '</td></tr>';
             var card =
               '<article class="card" style="background:' + color + '">' +
                 '<div class="when">' + when + (placeHtml ? ' · ' + placeHtml : '') + '</div>' +
-                '<div class="title">' + title + '</div>' +
-                (participants ? '<div class="meta">Участники: ' + participants + '</div>' : '') +
-                (leader ? '<div class="meta">Ведущий: ' + leader + '</div>' : '') +
+                '<div class="title"' + titleAttr + '>' + title + '</div>' +
+                (participants ? '<div class="meta clamp"' + participantsAttr + '>Участники: ' + participants + '</div>' : '') +
+                (leader ? '<div class="meta"' + leaderAttr + '>Ведущий: ' + leader + '</div>' : '') +
                 (ev.endDate ? '<div class="meta">до ' + escapeHtml(ev.endDate) + '</div>' : '') +
               '</article>';
             return { tableRow: tableRow, card: card };
