@@ -133,58 +133,12 @@
     .card .when { font-weight: 600; margin-bottom: 4px; }
     .card .title { font-weight: 700; margin-bottom: 4px; }
     .card .meta { color: var(--muted); font-size: 0.92rem; }
-
-    .day-panel {
-      display: none;
-      margin-top: 18px;
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(50, 40, 20, 0.06);
-      overflow: hidden;
-    }
-    .day-panel.is-open { display: block; }
-    .day-panel-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--line);
-      background: #f3efe6;
-    }
-    .day-panel-head h2 {
-      margin: 0;
-      font-family: Georgia, serif;
-      font-size: 1.15rem;
-      font-weight: 600;
-    }
-    .day-panel-close {
-      border: 1px solid var(--line);
-      background: #fffdf8;
-      color: var(--ink);
-      width: 2rem;
-      height: 2rem;
-      border-radius: 6px;
-      font-size: 1.25rem;
-      line-height: 1;
-      cursor: pointer;
-    }
-    .day-panel-close:hover { background: #f0ebe1; }
-    .day-panel-body { padding: 12px 14px 16px; }
-    .day-panel-empty {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-    .day-panel .card { margin-bottom: 10px; }
-    .day-panel .card:last-child { margin-bottom: 0; }
-    .fc .fc-daygrid-day:hover { cursor: pointer; }
-
     @media (max-width: 720px) {
       .wrap { width: calc(100% - 16px); padding: 12px 0 32px; }
       header.page-header h1 { font-size: 1.35rem; line-height: 1.25; }
-      #calendar { padding: 8px; margin-bottom: 12px; overflow: hidden; }
+      table.events-table { display: none; }
+      .cards { display: block; }
+      #calendar { padding: 8px; margin-bottom: 18px; overflow: hidden; }
       .fc .fc-toolbar { display: grid; grid-template-columns: 1fr; gap: 8px; }
       .fc .fc-toolbar-chunk { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; }
       .fc .fc-toolbar-title { font-size: 1rem; text-align: center; }
@@ -193,7 +147,7 @@
         font-size: 0.65rem; padding: 0 2px; white-space: nowrap;
         overflow: hidden; text-overflow: ellipsis;
       }
-      .day-panel-head h2 { font-size: 1rem; }
+      .fc .fc-list-event-time { min-width: 6.8rem; width: 6.8rem; font-size: 0.82rem; }
     }
   </style>
 </head>
@@ -204,13 +158,10 @@
       <p class="status" id="status">Загрузка…</p>
     </header>
     <div id="calendar" aria-label="Календарь мероприятий"></div>
-    <aside id="day-panel" class="day-panel" aria-live="polite" hidden>
-      <div class="day-panel-head">
-        <h2 id="day-panel-title">День</h2>
-        <button type="button" class="day-panel-close" id="day-panel-close" aria-label="Закрыть">×</button>
-      </div>
-      <div class="day-panel-body" id="day-panel-body"></div>
-    </aside>
+    <section class="list-section" aria-label="Список мероприятий">
+      <h2>Список по дням</h2>
+      <div id="event-list"></div>
+    </section>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
@@ -239,12 +190,8 @@
       };
 
       var statusEl = document.getElementById('status');
-      var dayPanel = document.getElementById('day-panel');
-      var dayPanelTitle = document.getElementById('day-panel-title');
-      var dayPanelBody = document.getElementById('day-panel-body');
-      var dayPanelClose = document.getElementById('day-panel-close');
+      var listEl = document.getElementById('event-list');
       var calendar;
-      var allEvents = [];
       var weekdayFormatter = new Intl.DateTimeFormat('ru-RU', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
       });
@@ -448,7 +395,7 @@
 
           script.onerror = function () {
             cleanup();
-            reject(new Error('Не удалось загрузить таблицу (проверьте доступ «по ссылке — читатель»)'))
+            reject(new Error('Не удалось загрузить таблицу (проверьте доступ «по ссылке — читатель»)'));
           };
           script.src =
             'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID +
@@ -477,49 +424,17 @@
         return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
       }
 
-      function closeDayPanel() {
-        dayPanel.classList.remove('is-open');
-        dayPanel.hidden = true;
-        dayPanelBody.innerHTML = '';
-      }
-
-      function openDayPanel(dateLike) {
+      function scrollToDay(dateLike) {
         var key = toDateKey(dateLike);
         if (!key) return;
-        var dayEvents = allEvents.filter(function (ev) { return ev.date === key; });
-        dayPanelTitle.textContent = formatDayHeading(key);
-        if (!dayEvents.length) {
-          dayPanelBody.innerHTML = '<p class="day-panel-empty">На этот день мероприятий нет.</p>';
-        } else {
-          dayPanelBody.innerHTML = dayEvents.map(function (ev) {
-            var when = timeLabel(ev);
-            var placeHtml = formatPlaceHtml(ev.place, ev.link);
-            var title = escapeHtml(ev.title);
-            var participants = escapeHtml(ev.participants);
-            var leader = escapeHtml(ev.leader);
-            var color = escapeHtml(ev.color || '#dde7ee');
-            return (
-              '<article class="card" style="background:' + color + '">' +
-                '<div class="when">' + when + (placeHtml ? ' · ' + placeHtml : '') + '</div>' +
-                '<div class="title">' + title + '</div>' +
-                (participants ? '<div class="meta">Участники: ' + participants + '</div>' : '') +
-                (leader ? '<div class="meta">Ведущий: ' + leader + '</div>' : '') +
-                (ev.endDate ? '<div class="meta">до ' + escapeHtml(ev.endDate) + '</div>' : '') +
-              '</article>'
-            );
-          }).join('');
-        }
-        dayPanel.hidden = false;
-        dayPanel.classList.add('is-open');
-        dayPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        var target = document.getElementById('day-' + key);
+        if (!target) return;
+        document.querySelectorAll('.day-block.is-target').forEach(function (el) {
+          el.classList.remove('is-target');
+        });
+        target.classList.add('is-target');
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-
-      if (dayPanelClose) {
-        dayPanelClose.addEventListener('click', closeDayPanel);
-      }
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeDayPanel();
-      });
 
       function toCalendarEvents(events, compact) {
         return events.map(function (ev) {
@@ -587,6 +502,49 @@
         return '';
       }
 
+      function renderList(events) {
+        var groups = groupByDate(events);
+        if (!groups.length) {
+          listEl.innerHTML = '<p class="status">В таблице пока нет актуальных событий.</p>';
+          return;
+        }
+        listEl.innerHTML = groups.map(function (group) {
+          var rows = group.events.map(function (ev) {
+            var when = timeLabel(ev);
+            var placeHtml = formatPlaceHtml(ev.place, ev.link);
+            var title = escapeHtml(ev.title);
+            var participants = escapeHtml(ev.participants);
+            var leader = escapeHtml(ev.leader);
+            var color = escapeHtml(ev.color || '#dde7ee');
+            var endNote = ev.endDate ? '<div class="meta">до ' + escapeHtml(ev.endDate) + '</div>' : '';
+            var tableRow =
+              '<tr style="background:' + color + '">' +
+                '<td style="width:28%">' + (when ? when + '<br>' : '') +
+                  (placeHtml ? '<span class="meta">' + placeHtml + '</span>' : '') + endNote + '</td>' +
+                '<td style="width:44%"><span class="event-title">' + title + '</span>' +
+                  (participants ? '<div class="meta">Участники: ' + participants + '</div>' : '') + '</td>' +
+                '<td style="width:28%">' + leader + '</td></tr>';
+            var card =
+              '<article class="card" style="background:' + color + '">' +
+                '<div class="when">' + when + (placeHtml ? ' · ' + placeHtml : '') + '</div>' +
+                '<div class="title">' + title + '</div>' +
+                (participants ? '<div class="meta">Участники: ' + participants + '</div>' : '') +
+                (leader ? '<div class="meta">Ведущий: ' + leader + '</div>' : '') +
+                (ev.endDate ? '<div class="meta">до ' + escapeHtml(ev.endDate) + '</div>' : '') +
+              '</article>';
+            return { tableRow: tableRow, card: card };
+          });
+          return (
+            '<section class="day-block" id="day-' + escapeHtml(group.date) + '">' +
+              '<h3>' + escapeHtml(formatDayHeading(group.date)) + '</h3>' +
+              '<table class="events-table"><thead><tr>' +
+                '<th scope="col">Время/Место</th><th scope="col">Мероприятие/Участники</th><th scope="col">Ведущий</th>' +
+              '</tr></thead><tbody>' + rows.map(function (r) { return r.tableRow; }).join('') + '</tbody></table>' +
+              '<div class="cards">' + rows.map(function (r) { return r.card; }).join('') + '</div></section>'
+          );
+        }).join('');
+      }
+
       function isMobile() {
         return window.matchMedia('(max-width: 720px)').matches;
       }
@@ -608,7 +566,7 @@
           dayMaxEvents: mobile ? 2 : 4,
           moreLinkClick: function (info) {
             if (info.jsEvent) info.jsEvent.preventDefault();
-            openDayPanel(info.date);
+            scrollToDay(info.date);
           },
           eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
           views: {
@@ -620,9 +578,9 @@
             info.jsEvent.preventDefault();
             var date = (info.event.extendedProps && info.event.extendedProps.date) ||
               (info.event.startStr || '').slice(0, 10);
-            openDayPanel(date);
+            scrollToDay(date);
           },
-          dateClick: function (info) { openDayPanel(info.date); }
+          dateClick: function (info) { scrollToDay(info.date); }
         });
         calendar.render();
 
@@ -649,9 +607,10 @@
 
       loadSheetMatrix()
         .then(function (matrix) {
-          allEvents = rowsToEvents(matrix);
-          initCalendar(allEvents);
-          setStatus('Событий: ' + allEvents.length + ' · нажмите на день в календаре');
+          var events = rowsToEvents(matrix);
+          initCalendar(events);
+          renderList(events);
+          setStatus('Событий: ' + events.length);
         })
         .catch(function (err) {
           setStatus('Не удалось загрузить данные: ' + (err && err.message ? err.message : err), true);
