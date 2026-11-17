@@ -69,6 +69,14 @@
       min-height: 44px;
       display: flex;
     }
+    .classic-link {
+      color: #78747e;
+      font-size: 15px;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      white-space: nowrap;
+    }
+    .classic-link:hover { color: #6450b5; }
 
     .intro {
       justify-content: space-between;
@@ -570,8 +578,9 @@
       .header { height: 90px; }
       .brand { font-size: 22px; }
       .brand small { letter-spacing: 1.8px; font-size: 11px; }
-      .header-right { gap: 14px; }
+      .header-right { gap: 10px; }
       .header-divider, .nav-current, .help-button span { display: none; }
+      .classic-link { font-size: 13px; }
       .help-button { padding: 10px; }
       .intro { padding: 37px 0 30px; display: block; }
       .eyebrow { letter-spacing: 1.4px; font-size: 12px; }
@@ -683,6 +692,7 @@
       <div class="header-right">
         <span class="nav-current">Расписание</span>
         <span class="header-divider"></span>
+        <a href="../" class="classic-link">Классическая версия</a>
         <button class="help-button" type="button" id="help-btn">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
           <span>Как пользоваться</span>
