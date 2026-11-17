@@ -560,9 +560,20 @@
       footer > span:first-child { font-size: 20px; }
       footer p { font-size: 12px; }
       footer .footer-right { display: none; }
-      .event-dialog { padding: 32px 24px; }
-      .event-dialog h2 { font-size: 31px; }
-      .event-dialog dl > div { grid-template-columns: 20px 58px 1fr; gap: 8px; font-size: 15px; }
+      .event-dialog { padding: 32px 24px; width: calc(100% - 24px); max-height: 85dvh; }
+      .event-dialog h2 { font-size: 28px; }
+      .event-dialog dl > div {
+        grid-template-columns: 22px 1fr;
+        gap: 6px 10px;
+        font-size: 15px;
+      }
+      .event-dialog dt {
+        grid-column: 2;
+        font-size: 13px;
+        margin-bottom: -2px;
+      }
+      .event-dialog dd { grid-column: 2; }
+      .event-dialog dl svg { grid-row: 1 / span 2; align-self: start; margin-top: 2px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { transition: none !important; }
@@ -1085,8 +1096,18 @@
         html += '<div class="link-pending">Ссылка появится, когда её добавит организатор.</div>';
       }
       eventDialog.innerHTML = html;
-      if (typeof eventDialog.showModal === 'function') eventDialog.showModal();
-      else eventDialog.setAttribute('open', '');
+      try {
+        if (typeof eventDialog.showModal === 'function' && !eventDialog.open) eventDialog.showModal();
+        else eventDialog.setAttribute('open', '');
+      } catch (err) {
+        eventDialog.setAttribute('open', '');
+        eventDialog.style.display = 'block';
+        eventDialog.style.position = 'fixed';
+        eventDialog.style.inset = '0';
+        eventDialog.style.margin = 'auto';
+        eventDialog.style.zIndex = '9999';
+      }
+      eventDialog.scrollTop = 0;
     }
 
     function goToday() {
@@ -1131,22 +1152,30 @@
     });
 
     document.addEventListener('click', function (e) {
-      var card = e.target.closest('[data-id]');
-      if (card && (card.classList.contains('event-card') || card.classList.contains('list-event'))) {
+      if (e.target.closest('dialog')) return;
+      var card = e.target.closest('.event-card[data-id], .list-event[data-id]');
+      if (card) {
+        e.preventDefault();
         openEvent(card.getAttribute('data-id'));
         return;
       }
-      var more = e.target.closest('.more, .mobile-dot');
-      if (more && more.getAttribute('data-day')) {
+      var more = e.target.closest('.more[data-day], .mobile-dot[data-day]');
+      if (more) {
         selectedDay = more.getAttribute('data-day');
         renderCalendar();
+        var details = document.getElementById('day-details');
+        if (details) details.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
-      var dayBtn = e.target.closest('.day-number');
       var day = e.target.closest('.day[data-day]');
-      if (dayBtn && day) {
+      if (day && (e.target.closest('.day-number') || window.matchMedia('(max-width: 700px)').matches)) {
+        if (e.target.closest('.event-card')) return;
         selectedDay = day.getAttribute('data-day');
         renderCalendar();
+        var box = document.getElementById('day-details');
+        if (box && window.matchMedia('(max-width: 700px)').matches) {
+          box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }
     });
 
