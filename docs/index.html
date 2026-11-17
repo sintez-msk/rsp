@@ -564,23 +564,12 @@
           firstDay: 1,
           displayEventEnd: true,
           dayMaxEvents: mobile ? 2 : 4,
-          moreLinkClick: function (info) {
-            if (info.jsEvent) info.jsEvent.preventDefault();
-            scrollToDay(info.date);
-          },
           eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
           views: {
             dayGridMonth: { buttonText: 'Сетка', dayMaxEventRows: mobile ? 2 : 4, eventDisplay: 'block' },
             timeGridWeek: { buttonText: 'Неделя' }
           },
-          events: toCalendarEvents(events, mobile),
-          eventClick: function (info) {
-            info.jsEvent.preventDefault();
-            var date = (info.event.extendedProps && info.event.extendedProps.date) ||
-              (info.event.startStr || '').slice(0, 10);
-            scrollToDay(date);
-          },
-          dateClick: function (info) { scrollToDay(info.date); }
+          events: toCalendarEvents(events, mobile)
         });
         calendar.render();
 
