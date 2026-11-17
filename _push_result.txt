@@ -1,0 +1,14 @@
+﻿FAILURE
+reason: shell execution unavailable in this agent environment (commands spawn with no exit status; sandbox cannot enforce workspace_readwrite; push-to-main approval path did not yield a runnable shell)
+attempted:
+  cd /d E:\Расписание
+  git add docs/index.html
+  git commit -m "Mobile: use month grid instead of list view"
+  git push origin main
+  verify: git show origin/main:docs/index.html for initialView/dayGridMonth and mobile headerToolbar without listMonth
+local_state_observed:
+  branch: main @ 2dec37e82cc98034f732585deb10971f61559916
+  origin/main: 2dec37e82cc98034f732585deb10971f61559916 (unchanged; push did not run)
+  docs/index.html (working tree, readable): HAS initialView: 'dayGridMonth'; mobile headerToolbar is prev,next + today only; listMonth only on desktop toolbar
+remote_verify: NOT DONE (git show / push could not execute)
+result: failure
