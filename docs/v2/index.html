@@ -4,15 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Расписание мероприятий — Философия Синтеза</title>
-  <meta name="description" content="Календарь встреч Философии Синтеза: лекции, практики и живой диалог.">
+  <meta name="description" content="Календарь встреч Философии Синтеза: лекции, практики и живой диалог. Даты, время, ведущие и места проведения.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border: 0 solid; }
     body {
-      color: rgb(41, 38, 53);
-      background: rgb(250, 249, 246);
+      color: #292635;
+      background: #faf9f6;
+      margin: 0;
       font-family: "Golos Text", sans-serif;
       font-size: 18px;
       line-height: 1.5;
@@ -21,13 +22,16 @@
     button, a { -webkit-tap-highlight-color: transparent; transition: background .18s, color .18s, box-shadow .18s; }
     button { font: inherit; cursor: pointer; color: inherit; background: none; border: 0; }
     a { color: inherit; text-decoration: none; }
-    button:focus-visible, a:focus-visible { outline: 3px solid rgb(121, 98, 196); outline-offset: 3px; }
-    button:hover { color: rgb(100, 80, 181); }
-    ::selection { background: rgb(230, 221, 250); }
+    button:focus-visible, a:focus-visible { outline-offset: 3px; outline: 3px solid #7962c4; }
+    button:hover { color: #6450b5; }
+    h1, h2, h3, p { margin: 0; }
+    button:disabled { cursor: default; }
+    dialog { color: #292635; }
+    ::selection { background: #e6ddfa; }
 
     .site { max-width: 1440px; margin: auto; padding: 0 56px; }
     .header {
-      border-bottom: 1px solid rgb(231, 228, 222);
+      border-bottom: 1px solid #e7e4de;
       justify-content: space-between;
       align-items: center;
       height: 113px;
@@ -35,43 +39,35 @@
     }
     .brand {
       letter-spacing: -.8px;
-      font-family: "Source Serif 4", Georgia, serif;
+      font-family: "Golos Text", sans-serif;
       font-size: 25px;
+      font-weight: 500;
       line-height: 1.1;
     }
-    .brand span { font-style: italic; }
+    .brand span { font-style: normal; }
     .brand small {
       letter-spacing: 2.5px;
-      color: rgb(135, 129, 140);
+      color: #87818c;
       margin-top: 10px;
       font: 12px "Golos Text", sans-serif;
       display: block;
     }
     .header-right { align-items: center; gap: 26px; font-size: 16px; display: flex; }
-    .nav-current { color: rgb(98, 81, 142); position: relative; }
+    .nav-current { color: #62518e; position: relative; }
     .nav-current::after {
       content: "";
-      background: rgb(120, 97, 182);
+      background: #7861b6;
       border-radius: 50%;
       width: 4px; height: 4px;
       position: absolute; bottom: -13px; left: 50%;
     }
-    .header-divider { background: rgb(222, 219, 212); width: 1px; height: 20px; }
-    .help-button, .classic-link {
-      color: rgb(120, 116, 126);
+    .header-divider { background: #dedbd4; width: 1px; height: 20px; }
+    .help-button {
+      color: #78747e;
       align-items: center;
       gap: 9px;
       min-height: 44px;
       display: flex;
-      font-size: 15px;
-    }
-    .test-badge {
-      color: rgb(149, 130, 166);
-      border: 1px solid rgb(220, 211, 230);
-      border-radius: 5px;
-      padding: 5px 9px;
-      font-size: 13px;
-      white-space: nowrap;
     }
 
     .intro {
@@ -82,7 +78,7 @@
     }
     .eyebrow {
       letter-spacing: 1.8px;
-      color: rgb(116, 100, 141);
+      color: #74648d;
       align-items: center;
       gap: 9px;
       font-size: 14px;
@@ -90,7 +86,7 @@
       display: flex;
     }
     .eyebrow > span {
-      background: rgb(146, 128, 179);
+      background: #9280b3;
       border-radius: 50%;
       width: 6px; height: 6px;
     }
@@ -99,18 +95,18 @@
       margin: 20px 0;
       font: 400 59px / 1.12 "Source Serif 4", Georgia, serif;
     }
-    h1 em { color: rgb(124, 101, 166); font-weight: 400; font-style: italic; }
-    .intro > div > p { color: rgb(128, 123, 133); font-size: 17px; line-height: 1.85; }
+    h1 em { color: #7c65a6; font-weight: 400; font-style: italic; }
+    .intro p { color: #807b85; font-size: 17px; line-height: 1.85; }
     .intro-note { align-items: center; gap: 18px; margin: 35px 35px 0 30px; display: flex; }
     .note-orbit {
-      color: rgb(201, 190, 220);
+      color: #c9bedc;
       font-family: Georgia, serif;
       font-size: 83px;
       font-weight: 400;
       line-height: 1;
     }
-    .intro-note p { font-size: 15px; line-height: 1.9; color: rgb(128, 123, 133); }
-    .intro-note strong { color: rgb(81, 72, 94); font-weight: 400; }
+    .intro-note p { font-size: 15px; line-height: 1.9; color: #807b85; }
+    .intro-note strong { color: #51485e; font-weight: 400; }
 
     .schedule { margin-top: 13px; }
     .section-heading {
@@ -122,27 +118,27 @@
     .section-heading > div { flex-wrap: wrap; align-items: center; gap: 14px; display: flex; }
     .section-heading h2 { letter-spacing: -.4px; font-size: 22px; font-weight: 500; }
     .count {
-      color: rgb(147, 139, 156);
-      background: rgb(238, 235, 241);
+      color: #938b9c;
+      background: #eeebf1;
       border-radius: 20px;
       padding: 5px 9px;
       font-size: 14px;
     }
     .legend {
-      color: rgb(123, 116, 131);
+      color: #7b7483;
       align-items: center;
       gap: 8px;
       font-size: 14px;
       display: flex;
     }
     .legend i {
-      background: rgb(179, 161, 210);
+      background: #b3a1d2;
       border-radius: 50%;
       width: 7px; height: 7px;
       margin-left: 14px;
       display: block;
     }
-    .legend i:last-child { background: rgb(212, 174, 145); }
+    .legend i:last-child { background: #d4ae91; }
 
     .toolbar {
       flex-wrap: wrap;
@@ -169,25 +165,25 @@
       min-height: 44px;
       display: grid;
     }
-    .arrows button:hover { background: rgb(238, 235, 243); }
+    .arrows button:hover { background: #eeebf3; }
     .today-button {
       background: #fff;
-      border: 1px solid rgb(226, 222, 223);
+      border: 1px solid #e2dedf;
       border-radius: 7px;
       min-height: 44px;
       padding: 0 15px;
       font-size: 15px;
     }
     .view-switch {
-      background: rgb(238, 236, 234);
-      border: 1px solid rgb(233, 230, 226);
+      background: #eeecea;
+      border: 1px solid #e9e6e2;
       border-radius: 9px;
       gap: 3px;
       padding: 4px;
       display: flex;
     }
     .view-switch button {
-      color: rgb(130, 123, 136);
+      color: #827b88;
       border-radius: 6px;
       align-items: center;
       gap: 7px;
@@ -197,45 +193,45 @@
       display: flex;
     }
     .view-switch button.chosen {
-      color: rgb(89, 72, 109);
+      color: #59486d;
       background: #fff;
-      box-shadow: rgba(50, 44, 57, .063) 0 1px 5px;
+      box-shadow: 0 1px 5px #322c3910;
     }
 
     .calendar {
       background: #fff;
-      border: 1px solid rgb(231, 227, 233);
+      border: 1px solid #e7e3e9;
       border-radius: 12px;
       overflow: hidden;
     }
     .weekdays {
-      background: rgb(247, 246, 248);
-      border-bottom: 1px solid rgb(232, 228, 235);
+      background: #f7f6f8;
+      border-bottom: 1px solid #e8e4eb;
       grid-template-columns: repeat(7, minmax(0, 1fr));
       height: 42px;
       display: grid;
     }
     .weekdays span {
       letter-spacing: 1px;
-      color: rgb(138, 132, 145);
+      color: #8a8491;
       padding: 14px 15px;
       font-size: 13px;
     }
-    .weekdays span:nth-last-child(-n+2) { color: rgb(177, 167, 188); }
+    .weekdays span:nth-last-child(-n+2) { color: #b1a7bc; }
     .calendar-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); display: grid; }
     .day {
-      border-bottom: 1px solid rgb(238, 234, 240);
-      border-right: 1px solid rgb(238, 234, 240);
+      border-bottom: 1px solid #eeeaf0;
+      border-right: 1px solid #eeeaf0;
       min-height: 190px;
       padding: 7px 8px 9px;
       position: relative;
     }
-    .day:nth-child(7n) { background: rgb(253, 252, 254); border-right: 0; }
-    .day:nth-child(7n-1) { background: rgb(253, 252, 254); }
-    .outside { background: rgb(251, 250, 251) !important; }
-    .outside .day-number { color: rgb(200, 196, 206); }
+    .day:nth-child(7n) { background: #fdfcfe; border-right: 0; }
+    .day:nth-child(7n-1) { background: #fdfcfe; }
+    .outside { background: #fbfafb !important; }
+    .outside .day-number { color: #c8c4ce; }
     .day-number {
-      color: rgb(130, 123, 139);
+      color: #827b8b;
       border-radius: 50%;
       place-items: center;
       width: 30px; height: 30px;
@@ -243,32 +239,26 @@
       font-size: 15px;
       display: grid;
     }
-    .day-number:hover { color: rgb(100, 80, 181); background: rgb(238, 235, 243); }
-    .event-card.online {
-      color: rgb(103, 82, 126);
-      background: rgb(240, 235, 248);
-      border-left-color: rgb(183, 164, 206);
-    }
-    .is-today .day-number { color: #fff; background: rgb(120, 97, 159); }
-    .is-today { background: rgb(250, 248, 254) !important; }
+    .is-today .day-number { color: #fff; background: #78619f; }
+    .is-today { background: #faf8fe !important; }
     .day-events { flex-direction: column; gap: 5px; display: flex; }
     .event-card {
       text-align: left;
-      color: rgb(103, 82, 126);
-      background: rgb(240, 235, 248);
-      border-left: 2px solid rgb(183, 164, 206);
+      color: #67527e;
+      background: #f0ebf8;
+      border-left: 2px solid #b7a4ce;
       border-radius: 6px;
       width: 100%;
       min-height: 80px;
       padding: 8px 9px;
     }
     .event-card.offline {
-      color: rgb(136, 103, 78);
+      color: #88674e;
       background: linen;
-      border-left-color: rgb(214, 179, 147);
+      border-left-color: #d6b393;
     }
-    .event-card:hover { background: rgb(230, 221, 243); box-shadow: rgba(112, 91, 141, .082) 0 2px 8px; }
-    .event-card.offline:hover { color: rgb(120, 84, 59); background: rgb(245, 229, 214); }
+    .event-card:hover { background: #e6ddf3; box-shadow: 0 2px 8px #705b8d15; }
+    .event-card.offline:hover { color: #78543b; background: #f5e5d6; }
     .event-top {
       justify-content: space-between;
       align-items: center;
@@ -290,25 +280,26 @@
     }
     .event-host { opacity: .75; margin-top: 6px; font-size: 12px; display: block; }
     .mobile-dot { display: none; }
-    .more { text-align: left; color: rgb(115, 96, 142); padding: 7px; font-size: 14px; }
+    .more { text-align: left; color: #73608e; padding: 7px; font-size: 14px; }
     .day-details { display: none; }
     .calendar-bottom {
-      color: rgb(153, 145, 158);
+      color: #99919e;
       justify-content: space-between;
       margin-top: 16px;
       font-size: 14px;
       display: flex;
     }
+    .calendar-bottom > span:first-child { align-items: center; gap: 6px; display: flex; }
 
     .event-list {
       background: #fff;
-      border: 1px solid rgb(232, 227, 236);
+      border: 1px solid #e8e3ec;
       border-radius: 12px;
       overflow: hidden;
     }
     .list-event {
       text-align: left;
-      border-bottom: 1px solid rgb(238, 234, 240);
+      border-bottom: 1px solid #eeeaf0;
       align-items: center;
       gap: 24px;
       width: 100%;
@@ -316,25 +307,25 @@
       display: flex;
     }
     .list-event:last-child { border-bottom: 0; }
-    .list-event:hover { background: rgb(248, 245, 252); }
+    .list-event:hover { background: #f8f5fc; }
     .list-date {
       text-align: center;
       min-width: 42px;
       font: 30px "Source Serif 4", Georgia, serif;
     }
     .list-date small {
-      color: rgb(145, 136, 152);
+      color: #918898;
       font: 14px "Golos Text", sans-serif;
       display: block;
     }
-    .list-time { color: rgb(129, 113, 143); font-size: 16px; }
-    .list-copy { overflow-wrap: anywhere; flex: 1 1 0%; min-width: 0; }
+    .list-time { color: #81718f; font-size: 16px; }
+    .list-copy { overflow-wrap: anywhere; flex: 1; min-width: 0; }
     .list-copy strong { font-size: 18px; font-weight: 500; display: block; }
-    .list-copy small { color: rgb(155, 146, 159); margin-top: 8px; font-size: 14px; display: block; }
+    .list-copy small { color: #9b929f; margin-top: 8px; font-size: 14px; display: block; }
     .format {
-      color: rgb(113, 89, 133);
+      color: #715985;
       white-space: nowrap;
-      background: rgb(239, 233, 246);
+      background: #efe9f6;
       border-radius: 5px;
       align-items: center;
       gap: 6px;
@@ -342,59 +333,48 @@
       font-size: 14px;
       display: inline-flex;
     }
-    .format.offline { color: rgb(136, 100, 66); background: rgb(248, 238, 226); }
+    .format.offline { color: #886442; background: #f8eee2; }
 
-    .empty { text-align: center; color: rgb(156, 140, 171); padding: 45px 20px; }
-    .empty h3 { color: rgb(102, 84, 115); font: 26px "Source Serif 4", serif; }
+    .empty { text-align: center; color: #9c8cab; padding: 45px 20px; }
+    .empty > svg { margin: auto auto 15px; }
+    .empty h3 { color: #665473; font: 26px "Source Serif 4", serif; }
     .empty p { margin: 10px 0; font-size: 16px; }
+    .empty button {
+      border: 1px solid #ded5e6;
+      border-radius: 7px;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      padding: 12px;
+      display: inline-flex;
+    }
     .loading, .source-error {
-      background: rgb(240, 235, 246);
+      background: #f0ebf6;
       border-radius: 8px;
       margin-bottom: 14px;
       padding: 16px;
       font-size: 16px;
     }
     .source-error button { text-decoration: underline; }
-
-    .demo-notice {
-      background: rgb(244, 241, 247);
-      border: 1px solid rgb(230, 224, 237);
-      border-radius: 10px;
-      align-items: center;
-      gap: 16px;
-      margin: 34px 0 44px;
-      padding: 20px 23px;
-      display: flex;
-    }
-    .demo-notice strong { color: rgb(107, 90, 122); font-size: 16px; font-weight: 500; }
-    .demo-notice p { color: rgb(147, 134, 159); margin-top: 6px; font-size: 14px; line-height: 1.6; }
-    .demo-label {
-      color: rgb(149, 130, 166);
-      white-space: nowrap;
-      border: 1px solid rgb(220, 211, 230);
-      border-radius: 5px;
-      padding: 5px 9px;
-      font-size: 13px;
-      margin-left: auto;
-    }
+    .hidden { display: none !important; }
 
     footer {
-      color: rgb(170, 162, 172);
-      border-top: 1px solid rgb(231, 228, 222);
+      color: #aaa2ac;
+      border-top: 1px solid #e7e4de;
       align-items: center;
       gap: 24px;
       min-height: 90px;
       font-size: 14px;
       display: flex;
     }
-    footer > span:first-child { color: rgb(115, 107, 121); font: 22px "Source Serif 4", Georgia, serif; }
-    footer .footer-right { align-items: center; gap: 10px; margin-left: auto; display: inline-flex; }
-    .help-dialog .eyebrow { margin-bottom: 8px; }
-    .help-dialog .meeting-link { margin-top: 10px; }
+    footer > span:first-child { color: #736b79; font: 22px "Source Serif 4", Georgia, serif; }
+    footer .footer-right { align-items: center; gap: 10px; margin-left: auto; display: flex; }
+    footer .classic-mini { color: #aaa2ac; text-decoration: underline; text-underline-offset: 2px; }
 
-    .event-dialog, .help-dialog {
-      background: rgb(253, 252, 250);
-      border: 1px solid rgb(228, 220, 233);
+    .event-dialog {
+      position: relative;
+      background: #fdfcfa;
+      border: 1px solid #e4dce9;
       border-radius: 18px;
       width: calc(100% - 32px);
       max-width: 550px;
@@ -403,12 +383,11 @@
       padding: 42px;
       line-height: 1.6;
       overflow: auto;
-      box-shadow: rgba(51, 37, 59, .15) 0 30px 100px;
-      color: rgb(41, 38, 53);
+      box-shadow: 0 30px 100px #33253b26;
     }
-    .event-dialog::backdrop, .help-dialog::backdrop {
+    .event-dialog::backdrop {
       backdrop-filter: blur(5px);
-      background: rgba(48, 37, 63, .4);
+      background: #30253f66;
     }
     .close {
       border-radius: 50%;
@@ -418,22 +397,17 @@
       position: absolute;
       top: 15px; right: 15px;
     }
-    .close:hover { background: rgb(238, 232, 242); }
+    .close:hover { background: #eee8f2; }
     .dialog-label { gap: 10px; margin-bottom: 23px; display: flex; }
-    .event-dialog h2, .help-dialog h2 {
+    .event-dialog h2 {
       letter-spacing: -.8px;
       margin: 18px 0;
       font: 36px / 1.15 "Source Serif 4", Georgia, serif;
     }
-    .event-dialog p, .help-dialog p {
-      color: rgb(139, 126, 150);
-      margin: 16px 0;
-      font-size: 17px;
-      line-height: 1.8;
-    }
+    .event-dialog p { color: #8b7e96; margin: 16px 0; font-size: 17px; line-height: 1.8; }
     .event-dialog dl { margin: 25px 0; }
     .event-dialog dl > div {
-      border-bottom: 1px solid rgb(234, 228, 237);
+      border-bottom: 1px solid #eae4ed;
       grid-template-columns: 22px 75px 1fr;
       align-items: start;
       gap: 10px;
@@ -441,11 +415,12 @@
       font-size: 16px;
       display: grid;
     }
-    .event-dialog dt { color: rgb(160, 148, 169); }
+    .event-dialog dt { color: #a094a9; }
     .event-dialog dd { overflow-wrap: anywhere; min-width: 0; margin: 0; }
+    .event-dialog dl svg { color: #9b88ac; }
     .meeting-link {
       color: #fff;
-      background: rgb(117, 96, 143);
+      background: #75608f;
       border-radius: 8px;
       justify-content: space-between;
       align-items: center;
@@ -455,23 +430,19 @@
       font-size: 16px;
       display: flex;
     }
-    .meeting-link:hover { color: #fff; background: rgb(95, 72, 122); }
-    .link-pending {
-      background: rgb(240, 235, 244);
+    .meeting-link:hover { color: #fff; background: #5f487a; }
+    .event-dialog .link-pending {
+      background: #f0ebf4;
       border-radius: 7px;
       padding: 12px;
       font-size: 15px;
       margin-top: 20px;
     }
-    .help-dialog ol { margin: 12px 0 0 18px; color: rgb(139, 126, 150); font-size: 16px; line-height: 1.8; }
-    .help-dialog li { margin-bottom: 8px; }
-
-    .hidden { display: none !important; }
 
     @media (min-width: 701px) {
       .day-details:has(.list-event) {
         background: #fff;
-        border: 1px solid rgb(232, 227, 236);
+        border: 1px solid #e8e3ec;
         border-radius: 10px;
         margin-top: 16px;
         display: block;
@@ -483,6 +454,10 @@
         font-size: 16px;
         font-weight: 500;
       }
+    }
+    @media (min-width: 1500px) {
+      .intro { padding-top: 70px; padding-bottom: 55px; }
+      .day { min-height: 200px; }
     }
     @media (max-width: 1000px) {
       .site { padding: 0 28px; }
@@ -502,22 +477,26 @@
       .header { height: 90px; }
       .brand { font-size: 22px; }
       .brand small { letter-spacing: 1.8px; font-size: 11px; }
-      .header-right { gap: 10px; }
-      .header-divider, .nav-current, .help-button span, .classic-link span { display: none; }
-      .help-button, .classic-link { padding: 10px; }
+      .header-right { gap: 14px; }
+      .header-divider, .nav-current, .help-button span { display: none; }
+      .help-button { padding: 10px; }
       .intro { padding: 37px 0 30px; display: block; }
       .eyebrow { letter-spacing: 1.4px; font-size: 12px; }
       h1 { letter-spacing: -1.5px; max-width: 350px; margin: 17px 0; font-size: 39px; }
       h1 em { display: block; }
-      .intro > div > p { font-size: 16px; }
+      .intro p { font-size: 16px; }
       .intro-note { display: none; }
       .section-heading { margin: 14px 0 20px; }
+      .section-heading > div { flex-wrap: wrap; gap: 8px; }
+      .section-heading h2 { font-size: 19px; }
+      .count { font-size: 13px; }
       .legend { display: none; }
       .toolbar { flex-wrap: wrap; align-items: stretch; gap: 15px; }
       .month-controls { justify-content: space-between; gap: 5px; width: 100%; }
-      .month-controls h3 { flex: 1 1 0%; min-width: 0; font-size: 28px; }
+      .month-controls h3 { flex: 1; min-width: 0; font-size: 28px; }
+      .today-button { min-height: 44px; }
       .view-switch { width: 100%; }
-      .view-switch button { flex: 1 1 0%; justify-content: center; }
+      .view-switch button { flex: 1; justify-content: center; min-height: 36px; }
       .day {
         flex-direction: column;
         align-items: center;
@@ -528,8 +507,8 @@
       .day-number { width: 34px; height: 30px; margin: 0; font-size: 16px; }
       .day-events { display: none; }
       .mobile-dot {
-        color: rgb(114, 85, 134);
-        background: rgb(232, 223, 243);
+        color: #725586;
+        background: #e8dff3;
         border-radius: 10px;
         min-width: 20px;
         padding: 0 8px;
@@ -539,25 +518,32 @@
       }
       .weekdays { height: 35px; }
       .weekdays span { text-align: center; padding: 11px 0; font-size: 12px; }
-      .selected-day { box-shadow: rgb(192, 172, 206) 0 0 0 2px inset; }
+      .selected-day { box-shadow: inset 0 0 0 2px #c0acce; }
       .day-details { margin-top: 20px; display: block; }
       .day-details h4 {
         text-transform: capitalize;
         margin: 0 0 15px;
         font: 23px "Source Serif 4", Georgia, serif;
       }
-      .day-details > p { color: rgb(160, 142, 172); padding: 18px 0; font-size: 16px; }
+      .day-details > p { color: #a08eac; padding: 18px 0; font-size: 16px; }
       .list-event { flex-wrap: wrap; gap: 12px; padding: 20px 12px; }
       .list-date { min-width: 30px; font-size: 26px; }
+      .list-time { font-size: 15px; }
       .list-copy { min-width: 160px; }
       .list-copy strong { font-size: 16px; line-height: 1.5; }
+      .list-copy small { font-size: 13px; line-height: 1.6; }
       .list-event > .format { margin-left: 54px; }
       .list-event > svg { margin-left: auto; }
       .calendar-bottom { align-items: center; gap: 12px; font-size: 12px; line-height: 1.6; }
-      footer { flex-wrap: wrap; gap: 10px; padding: 22px 0; }
+      .calendar-bottom > span:first-child { max-width: 200px; }
+      .calendar-bottom > span:last-child { text-align: right; }
+      footer { flex-wrap: wrap; gap: 10px; min-height: 90px; padding: 22px 0; }
+      footer > span:first-child { font-size: 20px; }
+      footer p { font-size: 12px; }
       footer .footer-right { display: none; }
-      .event-dialog, .help-dialog { padding: 32px 24px; }
-      .event-dialog h2, .help-dialog h2 { font-size: 31px; }
+      .event-dialog { padding: 32px 24px; }
+      .event-dialog h2 { font-size: 31px; }
+      .event-dialog dl > div { grid-template-columns: 20px 58px 1fr; gap: 8px; font-size: 15px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { transition: none !important; }
@@ -571,11 +557,8 @@
       <div class="header-right">
         <span class="nav-current">Расписание</span>
         <span class="header-divider"></span>
-        <a class="classic-link" href="../" title="Классический вариант">
-          <span class="test-badge">Тест</span>
-        </a>
         <button class="help-button" type="button" id="help-btn">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
           <span>Как пользоваться</span>
         </button>
       </div>
@@ -617,8 +600,8 @@
             <button type="button" class="today-button" id="today-btn">Сегодня</button>
           </div>
           <div class="view-switch" aria-label="Вид расписания">
-            <button type="button" id="view-calendar" aria-pressed="true" class="chosen">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+            <button type="button" id="view-calendar" class="chosen" aria-pressed="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
               Календарь
             </button>
             <button type="button" id="view-list" aria-pressed="false">
@@ -634,7 +617,10 @@
         <div id="day-details" class="day-details"></div>
 
         <div class="calendar-bottom">
-          <span>(UTC+3)</span>
+          <span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6v6h4"/><circle cx="12" cy="12" r="10"/></svg>
+            Время московское · МСК (UTC+3)
+          </span>
           <span>Расписание из Google Таблицы</span>
         </div>
       </section>
@@ -643,24 +629,21 @@
     <footer>
       <span>Философия Синтеза</span>
       <p>Место встречи идей и людей.</p>
-      <span class="footer-right">Познание начинается с встречи
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+      <span class="footer-right">
+        Познание начинается с встречи
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+        <a class="classic-mini" href="../">классика</a>
       </span>
     </footer>
   </div>
 
-  <dialog class="event-dialog" id="event-dialog">
-    <button type="button" class="close" id="close-event" aria-label="Закрыть">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-    </button>
-    <div id="event-dialog-body"></div>
-  </dialog>
+  <dialog class="event-dialog" id="event-dialog"></dialog>
 
-  <dialog class="help-dialog event-dialog" id="help-dialog">
+  <dialog class="event-dialog" id="help-dialog">
     <button type="button" class="close" id="close-help" aria-label="Закрыть">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
     </button>
-    <div class="eyebrow"><span></span> ВАША СЛЕДУЮЩАЯ ВСТРЕЧА</div>
+    <div class="eyebrow">ВАША СЛЕДУЮЩАЯ ВСТРЕЧА</div>
     <h2>Найдите время для познания</h2>
     <p>Переключайте месяцы стрелками. Кнопка «Сегодня» вернёт вас к текущему месяцу.</p>
     <p>Выбирайте календарь или список. Нажмите на мероприятие, чтобы узнать время, ведущего и место встречи.</p>
@@ -688,10 +671,25 @@
       status: ['status', 'статус']
     };
 
+    var ICON = {
+      video: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>',
+      pin: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>',
+      video12: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>',
+      pin12: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>',
+      arrow: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>',
+      close: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+      cal: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>',
+      clock: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6v6h4"/><circle cx="12" cy="12" r="10"/></svg>',
+      user: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>',
+      pin19: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>',
+      arrowUp: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>',
+      empty: '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>'
+    };
+
     var allEvents = [];
     var viewMode = 'calendar';
     var cursor = startOfMonth(new Date());
-    var selectedDay = null;
+    var selectedDay = todayKey();
     var statusEl = document.getElementById('status');
     var calendarWrap = document.getElementById('calendar-wrap');
     var listWrap = document.getElementById('list-wrap');
@@ -700,31 +698,17 @@
     var monthCount = document.getElementById('month-count');
     var eventDialog = document.getElementById('event-dialog');
     var helpDialog = document.getElementById('help-dialog');
-    var eventDialogBody = document.getElementById('event-dialog-body');
 
     var dayLongFmt = new Intl.DateTimeFormat('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
     var monthLong = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
     var monthShort = ['янв.', 'февр.', 'март', 'апр.', 'мая', 'июня', 'июля', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'];
-    function formatMonthTitle(d) {
-      return monthLong[d.getMonth()] + ' ' + d.getFullYear();
-    }
-    var ICON_VIDEO = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>';
-    var ICON_PIN = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>';
 
     function pad2(n) { var s = String(n); return s.length < 2 ? '0' + s : s; }
     function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
-    function toKey(d) {
-      return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
-    }
-    function parseKey(key) {
-      var p = key.split('-');
-      return new Date(+p[0], +p[1] - 1, +p[2]);
-    }
-    function todayKey() {
-      var n = new Date();
-      return toKey(n);
-    }
-    function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+    function toKey(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+    function todayKey() { return toKey(new Date()); }
+    function parseKey(key) { var p = key.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+    function formatMonthTitle(d) { return monthLong[d.getMonth()] + ' ' + d.getFullYear(); }
     function escapeHtml(text) {
       return String(text || '')
         .replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -737,28 +721,15 @@
     function isOnline(ev) {
       var place = (ev.place || '').toLowerCase();
       if (/онлайн|online/.test(place)) return true;
-      if (ev.link && (!ev.place || /^(онлайн|online)$/i.test(ev.place))) return true;
+      if (ev.link) return true;
       return false;
     }
-    function shortTitle(title, max) {
-      var t = String(title || '').trim();
-      return t.length <= max ? t : t.slice(0, max - 1).trim() + '…';
+    function placeLabel(ev) {
+      if (ev.place) return ev.place;
+      if (ev.link) return 'Онлайн ссылка ' + ev.link;
+      return '';
     }
 
-    function nowMoscowStamp() {
-      var parts = new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'Europe/Moscow',
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', second: '2-digit',
-        hour12: false
-      }).formatToParts(new Date());
-      var get = function (t) {
-        for (var i = 0; i < parts.length; i++) if (parts[i].type === t) return parts[i].value;
-        return '00';
-      };
-      return get('year') + '-' + get('month') + '-' + get('day') + 'T' +
-        get('hour') + ':' + get('minute') + ':' + get('second');
-    }
     function normalizeDate(value) {
       if (value == null || value === '') return '';
       var text = String(value).trim();
@@ -775,9 +746,7 @@
       if (m) return pad2(m[1]) + ':' + m[2];
       return '';
     }
-    function combineDateTime(date, time) {
-      return date + 'T' + (time || '00:00') + ':00';
-    }
+    function combineDateTime(date, time) { return date + 'T' + (time || '00:00') + ':00'; }
     function buildHeaderMap(headerRow) {
       var normalized = {};
       for (var c = 0; c < headerRow.length; c++) {
@@ -829,12 +798,10 @@
         var status = cellString(row, headerInfo.map.status);
         var participants = cellString(row, headerInfo.map.participants);
         var leader = cellString(row, headerInfo.map.leader);
-        if (link && place) {
-          place = place.split(link).join(' ').replace(/\s*[·|]\s*/g, ' ').replace(/\s+/g, ' ').trim();
+        if (!place && link) place = 'Онлайн ссылка ' + link;
+        if (status && participants && participants.indexOf(status) !== 0) {
+          /* keep participants as-is for dialog; status not prefixed */
         }
-        if (!place && link) place = 'Онлайн';
-        if (status && participants) participants = status + ' · ' + participants;
-        else if (status) participants = status;
         var endIsoDate = endDate || date;
         events.push({
           id: String(r),
@@ -915,30 +882,26 @@
     }
 
     function formatBadge(online) {
-      if (online) {
-        return '<span class="format online"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg> Онлайн</span>';
-      }
-      return '<span class="format offline"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg> Очно</span>';
+      if (online) return '<span class="format online">' + ICON.video12 + ' Онлайн</span>';
+      return '<span class="format offline">' + ICON.pin12 + ' Очно</span>';
     }
 
-    function listEventHtml(ev, withDate) {
+    function listEventHtml(ev) {
       var online = isOnline(ev);
       var d = parseKey(ev.date);
-      var dateHtml = withDate
-        ? '<span class="list-date">' + d.getDate() + '<small>' + monthShort[d.getMonth()] + '</small></span>'
-        : '';
       var meta = [];
       if (ev.leader) meta.push(escapeHtml(ev.leader));
-      if (ev.place) meta.push(escapeHtml(ev.place));
+      var place = placeLabel(ev);
+      if (place) meta.push(escapeHtml(place));
       return (
         '<button type="button" class="list-event" data-id="' + escapeHtml(ev.id) + '">' +
-          dateHtml +
+          '<span class="list-date">' + d.getDate() + '<small>' + monthShort[d.getMonth()] + '</small></span>' +
           '<span class="list-time">' + escapeHtml(ev.start || '—') + '</span>' +
           '<span class="list-copy"><strong>' + escapeHtml(ev.title) + '</strong>' +
           (meta.length ? '<small>' + meta.join(' · ') + '</small>' : '') +
           '</span>' +
           formatBadge(online) +
-          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>' +
+          ICON.arrow +
         '</button>'
       );
     }
@@ -958,49 +921,50 @@
       var i;
       for (i = 0; i < startPad; i++) {
         var pd = prevDays - startPad + i + 1;
-        var pdDate = new Date(y, m - 1, pd);
-        cells.push({ date: pdDate, outside: true, key: toKey(pdDate) });
+        cells.push({ date: new Date(y, m - 1, pd), outside: true });
       }
       for (i = 1; i <= daysInMonth; i++) {
-        var d = new Date(y, m, i);
-        cells.push({ date: d, outside: false, key: toKey(d) });
+        cells.push({ date: new Date(y, m, i), outside: false });
       }
-      while (cells.length % 7 !== 0 || cells.length < 42) {
+      while (cells.length % 7 !== 0) {
         var nd = cells.length - startPad - daysInMonth + 1;
-        var ndDate = new Date(y, m + 1, nd);
-        cells.push({ date: ndDate, outside: true, key: toKey(ndDate) });
-        if (cells.length >= 42) break;
+        cells.push({ date: new Date(y, m + 1, nd), outside: true });
       }
 
       var today = todayKey();
-      var maxShow = window.matchMedia('(max-width: 700px)').matches ? 0 : 2;
+      var maxShow = 2;
       var html = '<div class="calendar"><div class="weekdays">' +
         ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'].map(function (w) { return '<span>' + w + '</span>'; }).join('') +
         '</div><div class="calendar-grid">';
 
       cells.forEach(function (cell) {
-        var dayEvs = cell.outside ? [] : eventsOnDay(cell.key);
+        var key = toKey(cell.date);
+        var dayEvs = cell.outside ? [] : eventsOnDay(key);
+        var label = dayLongFmt.format(cell.date);
         var cls = 'day';
         if (cell.outside) cls += ' outside';
-        if (cell.key === today) cls += ' is-today';
-        if (selectedDay === cell.key) cls += ' selected-day';
-        html += '<div class="' + cls + '" data-day="' + cell.key + '">';
-        html += '<button type="button" class="day-number" aria-label="' + escapeHtml(dayLongFmt.format(cell.date)) + '">' + cell.date.getDate() + '</button>';
+        if (key === today) cls += ' is-today';
+        if (selectedDay === key) cls += ' selected-day';
+        html += '<div class="' + cls + '" data-day="' + key + '">';
+        html += '<button type="button" class="day-number" aria-label="' + escapeHtml(label) + '">' + cell.date.getDate() + '</button>';
+        html += '<div class="day-events">';
         if (dayEvs.length) {
-          html += '<span class="mobile-dot">' + dayEvs.length + '</span>';
-          html += '<div class="day-events">';
           dayEvs.slice(0, maxShow).forEach(function (ev) {
             var online = isOnline(ev);
             html += '<button type="button" class="event-card ' + (online ? 'online' : 'offline') + '" data-id="' + escapeHtml(ev.id) + '">' +
-              '<span class="event-top"><b>' + escapeHtml(ev.start || '') + '</b>' + (online ? ICON_VIDEO : ICON_PIN) + '</span>' +
+              '<span class="event-top"><b>' + escapeHtml(ev.start || '') + '</b>' + (online ? ICON.video : ICON.pin) + '</span>' +
               '<strong>' + escapeHtml(ev.title) + '</strong>' +
               (ev.leader ? '<span class="event-host">' + escapeHtml(ev.leader) + '</span>' : '') +
               '</button>';
           });
-          if (dayEvs.length > maxShow && maxShow > 0) {
-            html += '<button type="button" class="more" data-day="' + cell.key + '">Ещё ' + (dayEvs.length - maxShow) + '</button>';
+          if (dayEvs.length > maxShow) {
+            html += '<button type="button" class="more" data-day="' + key + '">Ещё ' + (dayEvs.length - maxShow) + '</button>';
           }
-          html += '</div>';
+        }
+        html += '</div>';
+        if (dayEvs.length) {
+          html += '<button type="button" class="mobile-dot" data-day="' + key + '" aria-label="' +
+            dayEvs.length + ' мероприятий, ' + escapeHtml(label) + '">' + dayEvs.length + '</button>';
         }
         html += '</div>';
       });
@@ -1017,35 +981,30 @@
       monthCount.textContent = monthEvents.length + ' в этом месяце';
       if (!monthEvents.length) {
         listWrap.innerHTML =
-          '<div class="event-list"><div class="empty">' +
+          '<div class="event-list"><div class="empty">' + ICON.empty +
           '<h3>В этом месяце мероприятий пока нет</h3>' +
           '<p>Загляните в соседний месяц или вернитесь к текущему.</p>' +
-          '<button type="button" id="empty-today">Сегодня</button>' +
-          '</div></div>';
+          '<button type="button" id="empty-today">Сегодня</button></div></div>';
         var btn = document.getElementById('empty-today');
         if (btn) btn.addEventListener('click', goToday);
         return;
       }
       listWrap.innerHTML = '<div class="event-list">' +
-        monthEvents.map(function (ev) { return listEventHtml(ev, true); }).join('') +
-        '</div>';
+        monthEvents.map(listEventHtml).join('') + '</div>';
     }
 
     function renderDayDetails() {
-      if (!selectedDay) {
+      if (viewMode !== 'calendar' || !selectedDay) {
         dayDetails.innerHTML = '';
-        dayDetails.classList.add('hidden');
         return;
       }
       var evs = eventsOnDay(selectedDay);
-      dayDetails.classList.remove('hidden');
       var heading = dayLongFmt.format(parseKey(selectedDay));
       if (!evs.length) {
         dayDetails.innerHTML = '<h4>' + escapeHtml(heading) + '</h4><p>На этот день встреч пока нет.</p>';
         return;
       }
-      dayDetails.innerHTML = '<h4>' + escapeHtml(heading) + '</h4>' +
-        '<div class="event-list">' + evs.map(function (ev) { return listEventHtml(ev, true); }).join('') + '</div>';
+      dayDetails.innerHTML = '<h4>' + escapeHtml(heading) + '</h4>' + evs.map(listEventHtml).join('');
     }
 
     function render() {
@@ -1057,7 +1016,6 @@
         calendarWrap.classList.add('hidden');
         listWrap.classList.remove('hidden');
         dayDetails.innerHTML = '';
-        dayDetails.classList.add('hidden');
         renderList();
       }
     }
@@ -1071,24 +1029,31 @@
       var ev = findEvent(id);
       if (!ev) return;
       var online = isOnline(ev);
-      var time = ev.start ? (ev.end ? ev.start + '–' + ev.end : ev.start) : '—';
+      var time = ev.start || '—';
+      if (ev.start && ev.end) time = ev.start + '–' + ev.end;
+      time += ' · Москва, МСК (UTC+3)';
       var html =
+        '<button type="button" class="close" aria-label="Закрыть">' + ICON.close + '</button>' +
         '<div class="dialog-label">' + formatBadge(online) + '</div>' +
         '<h2>' + escapeHtml(ev.title) + '</h2>' +
-        (ev.participants ? '<p>' + escapeHtml(ev.participants) + '</p>' : '') +
+        '<p class="dialog-description"></p>' +
         '<dl>' +
-          '<div><span>📅</span><dt>Дата</dt><dd>' + escapeHtml(capitalize(dayLongFmt.format(parseKey(ev.date)))) +
+          '<div>' + ICON.cal + '<dt>Дата</dt><dd>' + escapeHtml(dayLongFmt.format(parseKey(ev.date))) +
             (ev.endDate ? ' — ' + escapeHtml(ev.endDate) : '') + '</dd></div>' +
-          '<div><span>🕒</span><dt>Время</dt><dd>' + escapeHtml(time) + '</dd></div>' +
-          '<div><span>👤</span><dt>Ведущий</dt><dd>' + escapeHtml(ev.leader || '—') + '</dd></div>' +
-          '<div><span>📍</span><dt>Место</dt><dd>' + escapeHtml(ev.place || '—') + '</dd></div>' +
+          '<div>' + ICON.clock + '<dt>Время</dt><dd>' + escapeHtml(time) + '</dd></div>' +
+          '<div>' + ICON.user + '<dt>Ведущий</dt><dd>' + escapeHtml(ev.leader || '—') + '</dd></div>' +
+          '<div>' + ICON.pin19 + '<dt>Место</dt><dd>' + escapeHtml(placeLabel(ev) || '—') + '</dd></div>' +
+          (ev.participants
+            ? '<div>' + ICON.user + '<dt>Участники</dt><dd>' + escapeHtml(ev.participants) + '</dd></div>'
+            : '') +
         '</dl>';
       if (ev.link && /^https?:\/\//i.test(ev.link)) {
-        html += '<a class="meeting-link" href="' + escapeHtml(ev.link) + '" target="_blank" rel="noopener">Перейти по ссылке <span>↗</span></a>';
+        html += '<a class="meeting-link" href="' + escapeHtml(ev.link) + '" target="_blank" rel="noopener noreferrer">' +
+          (online ? 'Открыть онлайн-встречу' : 'Открыть ссылку') + ' ' + ICON.arrowUp + '</a>';
       } else if (online) {
         html += '<div class="link-pending">Ссылка появится, когда её добавит организатор.</div>';
       }
-      eventDialogBody.innerHTML = html;
+      eventDialog.innerHTML = html;
       if (typeof eventDialog.showModal === 'function') eventDialog.showModal();
       else eventDialog.setAttribute('open', '');
     }
@@ -1127,9 +1092,8 @@
     });
     document.getElementById('close-help').addEventListener('click', function () { helpDialog.close(); });
     document.getElementById('help-ok').addEventListener('click', function () { helpDialog.close(); });
-    document.getElementById('close-event').addEventListener('click', function () { eventDialog.close(); });
     eventDialog.addEventListener('click', function (e) {
-      if (e.target === eventDialog) eventDialog.close();
+      if (e.target === eventDialog || e.target.closest('.close')) eventDialog.close();
     });
     helpDialog.addEventListener('click', function (e) {
       if (e.target === helpDialog) helpDialog.close();
@@ -1141,8 +1105,8 @@
         openEvent(card.getAttribute('data-id'));
         return;
       }
-      var more = e.target.closest('.more');
-      if (more) {
+      var more = e.target.closest('.more, .mobile-dot');
+      if (more && more.getAttribute('data-day')) {
         selectedDay = more.getAttribute('data-day');
         renderCalendar();
         return;
@@ -1150,11 +1114,6 @@
       var dayBtn = e.target.closest('.day-number');
       var day = e.target.closest('.day[data-day]');
       if (dayBtn && day) {
-        selectedDay = day.getAttribute('data-day');
-        renderCalendar();
-        return;
-      }
-      if (day && window.matchMedia('(max-width: 700px)').matches) {
         selectedDay = day.getAttribute('data-day');
         renderCalendar();
       }
@@ -1172,7 +1131,7 @@
         statusEl.className = 'source-error';
         statusEl.innerHTML = 'Не удалось загрузить данные: ' + escapeHtml(err && err.message ? err.message : err) +
           ' <button type="button" id="retry-load">Повторить</button>';
-        document.getElementById('retry-load').addEventListener('click', location.reload.bind(location));
+        document.getElementById('retry-load').addEventListener('click', function () { location.reload(); });
       });
   })();
   </script>
