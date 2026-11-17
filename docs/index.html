@@ -558,7 +558,7 @@
           initialView: 'dayGridMonth',
           headerToolbar: mobile
             ? { left: 'prev,next', center: 'title', right: 'today' }
-            : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,listMonth' },
+            : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
           height: 'auto',
           contentHeight: 'auto',
           firstDay: 1,
@@ -602,9 +602,10 @@
             if (calendar.view.type !== 'dayGridMonth') calendar.changeView('dayGridMonth');
           } else {
             calendar.setOption('headerToolbar', {
-              left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,listMonth'
+              left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek'
             });
             calendar.setOption('dayMaxEvents', 4);
+            if (calendar.view.type === 'listMonth') calendar.changeView('dayGridMonth');
           }
         };
         if (mq.addEventListener) mq.addEventListener('change', onViewportChange);
