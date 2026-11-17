@@ -230,8 +230,8 @@
     .day {
       border-bottom: 1px solid #eeeaf0;
       border-right: 1px solid #eeeaf0;
-      min-height: 190px;
-      padding: 7px 8px 9px;
+      min-height: 132px;
+      padding: 5px 5px 6px;
       position: relative;
     }
     .day:nth-child(7n) { background: #fdfcfe; border-right: 0; }
@@ -249,46 +249,46 @@
     }
     .is-today .day-number { color: #fff; background: #78619f; }
     .is-today { background: #faf8fe !important; }
-    .day-events { flex-direction: column; gap: 5px; display: flex; }
+    .day-events { flex-direction: column; gap: 2px; display: flex; }
     .event-card {
       text-align: left;
-      color: #67527e;
+      color: #292635;
       background: #f0ebf8;
-      border-left: 2px solid #b7a4ce;
-      border-radius: 6px;
+      border-radius: 4px;
       width: 100%;
-      min-height: 80px;
-      padding: 8px 9px;
+      min-height: 0;
+      padding: 2px 5px;
+      line-height: 1.25;
     }
     .event-card.offline {
-      color: #88674e;
+      color: #1f1a14;
       background: linen;
-      border-left-color: #d6b393;
     }
-    .event-card:hover { background: #e6ddf3; box-shadow: 0 2px 8px #705b8d15; }
-    .event-card.offline:hover { color: #78543b; background: #f5e5d6; }
-    .event-top {
-      justify-content: space-between;
-      align-items: center;
-      gap: 4px;
-      margin-bottom: 5px;
-      font-size: 14px;
-      display: flex;
-    }
-    .event-top b { font-weight: 550; }
-    .event-card > strong {
-      overflow-wrap: anywhere;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      font-size: 15px;
-      font-weight: 500;
-      line-height: 1.45;
+    .event-card:hover { background: #e6ddf3; box-shadow: 0 1px 4px #705b8d12; }
+    .event-card.offline:hover { background: #f5e5d6; }
+    .event-card .event-line {
       display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
       overflow: hidden;
+      overflow-wrap: anywhere;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.25;
     }
-    .event-host { opacity: .75; margin-top: 6px; font-size: 12px; display: block; }
+    .event-card .event-line b {
+      font-weight: 600;
+      margin-right: 3px;
+      font-variant-numeric: tabular-nums;
+    }
     .mobile-dot { display: none; }
-    .more { text-align: left; color: #73608e; padding: 7px; font-size: 14px; }
+    .more {
+      text-align: left;
+      color: #73608e;
+      padding: 1px 4px;
+      font-size: 12px;
+      line-height: 1.3;
+    }
     .day-details { display: none; }
     .day-details .day-event-list { border-radius: 0; border: 0; }
     .day-details .list-event { cursor: pointer; }
@@ -558,7 +558,7 @@
     }
     @media (min-width: 1500px) {
       .intro { padding-top: 70px; padding-bottom: 55px; }
-      .day { min-height: 200px; }
+      .day { min-height: 148px; }
     }
     @media (max-width: 1000px) {
       .site { padding: 0 28px; }
@@ -566,10 +566,9 @@
       .intro-note { gap: 8px; margin-right: 0; }
       .intro-note p { font-size: 14px; }
       .note-orbit { font-size: 65px; }
-      .event-card { padding: 6px; }
-      .event-host { display: none; }
-      .event-card > strong { font-size: 14px; }
-      .day { min-height: 175px; }
+      .event-card { padding: 2px 4px; }
+      .event-card .event-line { font-size: 11px; }
+      .day { min-height: 120px; }
       .month-controls { gap: 10px; }
       .month-controls h3 { min-width: 190px; font-size: 27px; }
     }
@@ -856,6 +855,10 @@
         .replace(/&/g, '&amp;').replace(/</g, '&lt;')
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
+    function shortTitle(title, maxLen) {
+      var t = String(title || '').trim();
+      return t.length <= maxLen ? t : t.slice(0, maxLen - 1).trim() + '…';
+    }
     function extractUrl(text) {
       var m = String(text || '').match(/https?:\/\/[^\s<>"']+/i);
       return m ? m[0].replace(/[.,);]+$/g, '') : '';
@@ -1120,7 +1123,8 @@
       }
 
       var today = todayKey();
-      var maxShow = 2;
+      var maxShow = window.matchMedia('(max-width: 1000px)').matches ? 3 : 5;
+      var titleLen = window.matchMedia('(max-width: 1000px)').matches ? 36 : 52;
       var html = '<div class="calendar"><div class="weekdays">' +
         ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'].map(function (w) { return '<span>' + w + '</span>'; }).join('') +
         '</div><div class="calendar-grid">';
@@ -1140,10 +1144,11 @@
           dayEvs.slice(0, maxShow).forEach(function (ev) {
             var online = isOnline(ev);
             var base = ev.color ? 'event-card sheet-colored' : ('event-card ' + (online ? 'online' : 'offline'));
-            html += '<button type="button" class="' + base + '" data-id="' + escapeHtml(ev.id) + '"' + colorStyle(ev) + '>' +
-              '<span class="event-top"><b>' + escapeHtml(ev.start || '') + '</b>' + (online ? ICON.video : ICON.pin) + '</span>' +
-              '<strong>' + escapeHtml(ev.title) + '</strong>' +
-              (ev.leader ? '<span class="event-host">' + escapeHtml(ev.leader) + '</span>' : '') +
+            var line = (ev.start ? '<b>' + escapeHtml(ev.start) + '</b> ' : '') +
+              escapeHtml(shortTitle(ev.title, titleLen));
+            html += '<button type="button" class="' + base + '" data-id="' + escapeHtml(ev.id) + '"' +
+              colorStyle(ev) + ' title="' + escapeHtml(ev.title) + '">' +
+              '<span class="event-line">' + line + '</span>' +
               '</button>';
           });
           if (dayEvs.length > maxShow) {
