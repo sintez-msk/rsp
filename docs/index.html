@@ -53,7 +53,16 @@
       --fc-today-bg-color: rgba(61, 90, 76, 0.08);
     }
     .fc .fc-toolbar-title { font-size: 1.15rem; font-family: Georgia, serif; }
-    .fc .fc-event { border: none; color: var(--ink); font-size: 0.78rem; padding: 1px 3px; }
+    .fc .fc-event {
+      border: none;
+      color: var(--ink);
+      font-size: 0.78rem;
+      padding: 2px 4px;
+      line-height: 1.25;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .fc .fc-daygrid-event { white-space: normal; }
     .fc .fc-list-event-title { white-space: normal; word-break: break-word; }
     .fc .fc-list-event-time {
       white-space: nowrap !important;
@@ -143,10 +152,15 @@
       .fc .fc-toolbar-chunk { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; }
       .fc .fc-toolbar-title { font-size: 1rem; text-align: center; }
       .fc .fc-button { padding: 0.35em 0.55em; font-size: 0.8rem; }
+      .fc .fc-daygrid-day-frame { min-height: 6.2em; }
       .fc .fc-daygrid-event {
-        font-size: 0.65rem; padding: 0 2px; white-space: nowrap;
-        overflow: hidden; text-overflow: ellipsis;
+        font-size: 0.68rem;
+        padding: 1px 3px;
+        white-space: normal;
+        overflow: hidden;
+        display: block;
       }
+      .fc .fc-daygrid-event .fc-event-title { overflow-wrap: anywhere; }
       .fc .fc-list-event-time { min-width: 6.8rem; width: 6.8rem; font-size: 0.82rem; }
     }
   </style>
@@ -207,21 +221,6 @@
       function pad2(n) {
         var s = String(n);
         return s.length < 2 ? '0' + s : s;
-      }
-
-      function nowMoscowStamp() {
-        var parts = new Intl.DateTimeFormat('en-GB', {
-          timeZone: 'Europe/Moscow',
-          year: 'numeric', month: '2-digit', day: '2-digit',
-          hour: '2-digit', minute: '2-digit', second: '2-digit',
-          hour12: false
-        }).formatToParts(new Date());
-        var get = function (t) {
-          for (var i = 0; i < parts.length; i++) if (parts[i].type === t) return parts[i].value;
-          return '00';
-        };
-        return get('year') + '-' + get('month') + '-' + get('day') + 'T' +
-          get('hour') + ':' + get('minute') + ':' + get('second');
       }
 
       function normalizeDate(value) {
@@ -292,7 +291,6 @@
       function rowsToEvents(values) {
         var headerInfo = detectHeader(values);
         var events = [];
-        var nowMoscow = nowMoscowStamp();
 
         for (var r = headerInfo.dataStart; r < values.length; r++) {
           var row = values[r];
@@ -323,8 +321,15 @@
           var startIso = combineDateTime(date, startTime || '00:00');
           var endIsoDate = endDate || date;
           var endIso = combineDateTime(endIsoDate, endTime || startTime || '00:00');
-          var endForFilter = combineDateTime(endIsoDate, endTime || '23:59');
-          if (endForFilter < nowMoscow) continue;
+          if (endIso <= startIso) {
+            endIso = combineDateTime(endIsoDate, endTime || startTime || '00:00');
+            /* FullCalendar скрывает нулевую длительность — даём минимум 30 минут */
+            var parts = endIso.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/);
+            if (parts) {
+              var mins = (+parts[2]) * 60 + (+parts[3]) + 30;
+              endIso = parts[1] + 'T' + pad2(Math.floor(mins / 60) % 24) + ':' + pad2(mins % 60) + ':00';
+            }
+          }
 
           events.push({
             id: String(r),
@@ -441,11 +446,15 @@
 
       function toCalendarEvents(events, compact) {
         return events.map(function (ev) {
+          var label = compact ? shortTitle(ev.title, 48) : ev.title;
+          if (ev.start) label = ev.start + ' ' + label;
           return {
             id: ev.id,
-            title: compact ? shortTitle(ev.title, 42) : ev.title,
+            title: label,
             start: ev.startIso,
             end: ev.endIso,
+            allDay: false,
+            display: 'block',
             backgroundColor: ev.color || '#dde7ee',
             borderColor: ev.color || '#dde7ee',
             textColor: '#1f1a14',
@@ -565,14 +574,23 @@
           height: 'auto',
           contentHeight: 'auto',
           firstDay: 1,
-          displayEventEnd: true,
-          dayMaxEvents: mobile ? 2 : 4,
+          displayEventEnd: false,
+          displayEventTime: false,
+          dayMaxEvents: mobile ? 3 : 5,
+          moreLinkClick: 'popover',
           eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
           views: {
-            dayGridMonth: { buttonText: 'Сетка', dayMaxEventRows: mobile ? 2 : 4, eventDisplay: 'block' },
-            timeGridWeek: { buttonText: 'Неделя' }
+            dayGridMonth: { buttonText: 'Сетка', dayMaxEventRows: mobile ? 3 : 5, eventDisplay: 'block' },
+            timeGridWeek: { buttonText: 'Неделя', displayEventTime: true }
           },
-          events: toCalendarEvents(events, mobile)
+          events: toCalendarEvents(events, mobile),
+          eventClick: function (info) {
+            info.jsEvent.preventDefault();
+            scrollToDay(info.event.extendedProps.date || info.event.start);
+          },
+          dateClick: function (info) {
+            scrollToDay(info.date);
+          }
         });
         calendar.render();
 
@@ -583,13 +601,15 @@
             calendar.setOption('headerToolbar', {
               left: 'prev,next', center: 'title', right: 'today'
             });
-            calendar.setOption('dayMaxEvents', 2);
+            calendar.setOption('dayMaxEvents', 3);
+            calendar.setOption('events', toCalendarEvents(events, true));
             if (calendar.view.type !== 'dayGridMonth') calendar.changeView('dayGridMonth');
           } else {
             calendar.setOption('headerToolbar', {
               left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek'
             });
-            calendar.setOption('dayMaxEvents', 4);
+            calendar.setOption('dayMaxEvents', 5);
+            calendar.setOption('events', toCalendarEvents(events, false));
             if (calendar.view.type === 'listMonth') calendar.changeView('dayGridMonth');
           }
         };
