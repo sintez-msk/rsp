@@ -372,22 +372,35 @@
     footer > span:first-child { color: #736b79; font: 22px "Source Serif 4", Georgia, serif; }
     footer .footer-right { align-items: center; gap: 10px; margin-left: auto; display: flex; }
     .event-dialog {
-      position: relative;
+      position: fixed;
+      inset: 0;
+      width: calc(100% - 32px);
+      max-width: 550px;
+      height: fit-content;
+      max-height: min(90dvh, 90vh);
+      margin: auto;
+      transform: none;
       background: #fdfcfa;
       border: 1px solid #e4dce9;
       border-radius: 18px;
-      width: calc(100% - 32px);
-      max-width: 550px;
-      max-height: 90dvh;
-      margin: auto;
       padding: 42px;
       line-height: 1.6;
       overflow: auto;
+      -webkit-overflow-scrolling: touch;
       box-shadow: 0 30px 100px #33253b26;
+      z-index: 10000;
     }
     .event-dialog::backdrop {
       backdrop-filter: blur(5px);
       background: #30253f66;
+    }
+    body.dialog-open {
+      position: fixed;
+      left: 0;
+      right: 0;
+      width: 100%;
+      overflow: hidden;
+      touch-action: none;
     }
     .close {
       border-radius: 50%;
@@ -563,8 +576,15 @@
       footer > span:first-child { font-size: 20px; }
       footer p { font-size: 12px; }
       footer .footer-right { display: none; }
-      .event-dialog { padding: 32px 24px; width: calc(100% - 24px); max-height: 85dvh; }
-      .event-dialog h2 { font-size: 28px; }
+      .event-dialog {
+        inset: 12px;
+        width: auto;
+        max-width: none;
+        max-height: calc(100dvh - 24px);
+        padding: 28px 20px;
+        border-radius: 16px;
+      }
+      .event-dialog h2 { font-size: 26px; }
       .event-dialog dl > div {
         grid-template-columns: 22px 1fr;
         gap: 6px 10px;
@@ -1131,17 +1151,49 @@
         html += '<div class="link-pending">Ссылка появится, когда её добавит организатор.</div>';
       }
       eventDialog.innerHTML = html;
+      var scrollY = window.scrollY || window.pageYOffset || 0;
       try {
         if (eventDialog.open) eventDialog.close();
       } catch (eClose) {}
+      document.body.dataset.scrollY = String(scrollY);
+      document.body.classList.add('dialog-open');
+      document.body.style.top = '-' + scrollY + 'px';
       try {
         if (typeof eventDialog.showModal === 'function') eventDialog.showModal();
-        else eventDialog.setAttribute('open', '');
+        else {
+          eventDialog.setAttribute('open', '');
+          eventDialog.style.display = 'block';
+        }
       } catch (err) {
         eventDialog.setAttribute('open', '');
-        eventDialog.style.cssText = 'display:block;position:fixed;inset:16px;margin:auto;z-index:9999;max-height:85vh;overflow:auto;';
+        eventDialog.style.display = 'block';
       }
       eventDialog.scrollTop = 0;
+      var closeBtn = eventDialog.querySelector('.close');
+      if (closeBtn && closeBtn.focus) {
+        try { closeBtn.focus({ preventScroll: true }); } catch (eF) { closeBtn.focus(); }
+      }
+      requestAnimationFrame(function () {
+        window.scrollTo(0, scrollY);
+      });
+    }
+
+    function restoreBodyScroll() {
+      var scrollY = parseInt(document.body.dataset.scrollY || '0', 10) || 0;
+      document.body.classList.remove('dialog-open');
+      document.body.style.top = '';
+      delete document.body.dataset.scrollY;
+      window.scrollTo(0, scrollY);
+    }
+
+    function closeEventDialog() {
+      if (eventDialog.open) {
+        try { eventDialog.close(); } catch (e) { restoreBodyScroll(); }
+        return;
+      }
+      eventDialog.removeAttribute('open');
+      eventDialog.style.display = '';
+      restoreBodyScroll();
     }
 
     function goToday() {
@@ -1179,10 +1231,15 @@
     document.getElementById('close-help').addEventListener('click', function () { helpDialog.close(); });
     document.getElementById('help-ok').addEventListener('click', function () { helpDialog.close(); });
     eventDialog.addEventListener('click', function (e) {
-      if (e.target === eventDialog || e.target.closest('.close')) eventDialog.close();
+      if (e.target === eventDialog || e.target.closest('.close')) closeEventDialog();
     });
+    eventDialog.addEventListener('cancel', function (e) {
+      e.preventDefault();
+      closeEventDialog();
+    });
+    eventDialog.addEventListener('close', restoreBodyScroll);
     helpDialog.addEventListener('click', function (e) {
-      if (e.target === helpDialog) helpDialog.close();
+      if (e.target === helpDialog || e.target.closest('.close') || e.target.id === 'help-ok') helpDialog.close();
     });
 
     /* clicks on cards / day controls are bound in renderCalendar / renderDayDetails / renderList */
