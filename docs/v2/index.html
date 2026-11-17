@@ -369,8 +369,6 @@
     }
     footer > span:first-child { color: #736b79; font: 22px "Source Serif 4", Georgia, serif; }
     footer .footer-right { align-items: center; gap: 10px; margin-left: auto; display: flex; }
-    footer .classic-mini { color: #aaa2ac; text-decoration: underline; text-underline-offset: 2px; }
-
     .event-dialog {
       position: relative;
       background: #fdfcfa;
@@ -437,6 +435,27 @@
       padding: 12px;
       font-size: 15px;
       margin-top: 20px;
+    }
+    .event-card.sheet-colored,
+    .event-card.sheet-colored:hover {
+      background: var(--event-color);
+      color: #292635;
+      border-left-color: #6c6076;
+    }
+    .list-event.sheet-colored {
+      border-left: 5px solid var(--event-color);
+      background: var(--event-color);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .list-event.sheet-colored {
+        background: color-mix(in srgb, var(--event-color) 35%, white);
+      }
+    }
+    .list-event.sheet-colored:hover { background: var(--event-color); }
+    @supports (color: color-mix(in lab, red, red)) {
+      .list-event.sheet-colored:hover {
+        background: color-mix(in srgb, var(--event-color) 65%, white);
+      }
     }
 
     @media (min-width: 701px) {
@@ -600,11 +619,11 @@
             <button type="button" class="today-button" id="today-btn">Сегодня</button>
           </div>
           <div class="view-switch" aria-label="Вид расписания">
-            <button type="button" id="view-calendar" class="chosen" aria-pressed="true">
+            <button type="button" id="view-calendar" aria-pressed="false">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
               Календарь
             </button>
-            <button type="button" id="view-list" aria-pressed="false">
+            <button type="button" id="view-list" class="chosen" aria-pressed="true">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg>
               Список
             </button>
@@ -632,7 +651,6 @@
       <span class="footer-right">
         Познание начинается с встречи
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-        <a class="classic-mini" href="../">классика</a>
       </span>
     </footer>
   </div>
@@ -686,8 +704,13 @@
       empty: '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>'
     };
 
+    var STATUS_COLORS = {
+      'запланировано': '#dde7ee',
+      'в процессе': '#e7ebbc',
+      'завершено': '#e5e5e5'
+    };
     var allEvents = [];
-    var viewMode = 'calendar';
+    var viewMode = 'list';
     var cursor = startOfMonth(new Date());
     var selectedDay = todayKey();
     var statusEl = document.getElementById('status');
@@ -721,7 +744,7 @@
     function isOnline(ev) {
       var place = (ev.place || '').toLowerCase();
       if (/онлайн|online/.test(place)) return true;
-      if (ev.link) return true;
+      if (ev.link && (!ev.place || /^(онлайн|online)(\s|$)/i.test(ev.place))) return true;
       return false;
     }
     function placeLabel(ev) {
@@ -798,10 +821,9 @@
         var status = cellString(row, headerInfo.map.status);
         var participants = cellString(row, headerInfo.map.participants);
         var leader = cellString(row, headerInfo.map.leader);
+        var color = cellString(row, headerInfo.map.color);
         if (!place && link) place = 'Онлайн ссылка ' + link;
-        if (status && participants && participants.indexOf(status) !== 0) {
-          /* keep participants as-is for dialog; status not prefixed */
-        }
+        if (!color) color = STATUS_COLORS[(status || '').toLowerCase()] || '#dde7ee';
         var endIsoDate = endDate || date;
         events.push({
           id: String(r),
@@ -814,6 +836,7 @@
           link: link,
           participants: participants,
           leader: leader,
+          color: color,
           startIso: combineDateTime(date, startTime || '00:00'),
           endIso: combineDateTime(endIsoDate, endTime || startTime || '00:00')
         });
@@ -886,6 +909,13 @@
       return '<span class="format offline">' + ICON.pin12 + ' Очно</span>';
     }
 
+    function colorStyle(ev) {
+      return ev.color ? ' style="--event-color: ' + escapeHtml(ev.color) + ';"' : '';
+    }
+    function colorClass(ev) {
+      return ev.color ? ' sheet-colored' : '';
+    }
+
     function listEventHtml(ev) {
       var online = isOnline(ev);
       var d = parseKey(ev.date);
@@ -894,7 +924,7 @@
       var place = placeLabel(ev);
       if (place) meta.push(escapeHtml(place));
       return (
-        '<button type="button" class="list-event" data-id="' + escapeHtml(ev.id) + '">' +
+        '<button type="button" class="list-event' + colorClass(ev) + '" data-id="' + escapeHtml(ev.id) + '"' + colorStyle(ev) + '>' +
           '<span class="list-date">' + d.getDate() + '<small>' + monthShort[d.getMonth()] + '</small></span>' +
           '<span class="list-time">' + escapeHtml(ev.start || '—') + '</span>' +
           '<span class="list-copy"><strong>' + escapeHtml(ev.title) + '</strong>' +
@@ -951,7 +981,8 @@
         if (dayEvs.length) {
           dayEvs.slice(0, maxShow).forEach(function (ev) {
             var online = isOnline(ev);
-            html += '<button type="button" class="event-card ' + (online ? 'online' : 'offline') + '" data-id="' + escapeHtml(ev.id) + '">' +
+            var base = ev.color ? 'event-card sheet-colored' : ('event-card ' + (online ? 'online' : 'offline'));
+            html += '<button type="button" class="' + base + '" data-id="' + escapeHtml(ev.id) + '"' + colorStyle(ev) + '>' +
               '<span class="event-top"><b>' + escapeHtml(ev.start || '') + '</b>' + (online ? ICON.video : ICON.pin) + '</span>' +
               '<strong>' + escapeHtml(ev.title) + '</strong>' +
               (ev.leader ? '<span class="event-host">' + escapeHtml(ev.leader) + '</span>' : '') +
