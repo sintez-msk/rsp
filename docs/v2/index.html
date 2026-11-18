@@ -848,6 +848,20 @@
     function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
     function toKey(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
     function todayKey() { return toKey(new Date()); }
+    function nowMoscowStamp() {
+      var parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Moscow',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false
+      }).formatToParts(new Date());
+      var get = function (t) {
+        for (var i = 0; i < parts.length; i++) if (parts[i].type === t) return parts[i].value;
+        return '00';
+      };
+      return get('year') + '-' + get('month') + '-' + get('day') + 'T' +
+        get('hour') + ':' + get('minute') + ':' + get('second');
+    }
     function parseKey(key) { var p = key.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
     function formatMonthTitle(d) { return monthLong[d.getMonth()] + ' ' + d.getFullYear(); }
     function escapeHtml(text) {
@@ -962,6 +976,7 @@
     function rowsToEvents(values) {
       var headerInfo = detectHeader(values);
       var events = [];
+      var nowMoscow = nowMoscowStamp();
       for (var r = headerInfo.dataStart; r < values.length; r++) {
         var row = values[r];
         var title = cellString(row, headerInfo.map.title);
@@ -979,6 +994,8 @@
         if (!place && link) place = 'Онлайн ссылка ' + link;
         if (!color) color = STATUS_COLORS[(status || '').toLowerCase()] || '#dde7ee';
         var endIsoDate = endDate || date;
+        var endForFilter = combineDateTime(endIsoDate, endTime || '23:59');
+        if (endForFilter < nowMoscow) continue;
         events.push({
           id: String(r),
           title: title,

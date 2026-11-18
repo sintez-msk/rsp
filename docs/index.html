@@ -255,6 +255,21 @@
         return s.length < 2 ? '0' + s : s;
       }
 
+      function nowMoscowStamp() {
+        var parts = new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Europe/Moscow',
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit', second: '2-digit',
+          hour12: false
+        }).formatToParts(new Date());
+        var get = function (t) {
+          for (var i = 0; i < parts.length; i++) if (parts[i].type === t) return parts[i].value;
+          return '00';
+        };
+        return get('year') + '-' + get('month') + '-' + get('day') + 'T' +
+          get('hour') + ':' + get('minute') + ':' + get('second');
+      }
+
       function normalizeDate(value) {
         if (value == null || value === '') return '';
         var text = String(value).trim();
@@ -323,6 +338,7 @@
       function rowsToEvents(values) {
         var headerInfo = detectHeader(values);
         var events = [];
+        var nowMoscow = nowMoscowStamp();
 
         for (var r = headerInfo.dataStart; r < values.length; r++) {
           var row = values[r];
@@ -362,6 +378,8 @@
               endIso = parts[1] + 'T' + pad2(Math.floor(mins / 60) % 24) + ':' + pad2(mins % 60) + ':00';
             }
           }
+          var endForFilter = combineDateTime(endIsoDate, endTime || '23:59');
+          if (endForFilter < nowMoscow) continue;
 
           events.push({
             id: String(r),
